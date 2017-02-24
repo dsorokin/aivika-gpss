@@ -13,6 +13,7 @@ module Simulation.Aivika.GPSS.Transact
        (Transact,
         transactValue,
         transactArrivalTime,
+        transactPriority,
         takeTransact,
         releaseTransact,
         transactPreemptionBegin,
@@ -33,6 +34,8 @@ data Transact a =
              -- ^ The data of the transact.
              transactArrivalTime :: Double,
              -- ^ The time at which the transact was generated.
+             transactPriority :: Int,
+             -- ^ The transact priority.
              transactPreemptionCountRef :: Ref Int,
              -- ^ How many times the transact is preempted.
              transactProcessIdRef :: Ref (Maybe ProcessId),
