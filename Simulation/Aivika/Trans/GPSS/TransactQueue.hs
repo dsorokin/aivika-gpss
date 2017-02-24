@@ -13,7 +13,8 @@
 --
 module Simulation.Aivika.Trans.GPSS.TransactQueue
        (TransactQueue,
-        TransactQueueStrategy) where
+        TransactQueueStrategy,
+        newTransactQueue) where
 
 import Control.Monad
 import Control.Monad.Trans
@@ -24,8 +25,10 @@ import Simulation.Aivika.Trans
 import Simulation.Aivika.Trans.Queue.Infinite.Base
 import qualified Simulation.Aivika.Trans.DoubleLinkedList as DLL
 
+import Simulation.Aivika.GPSS.Transact
+
 -- | A transact queue.
-type TransactQueue m a = Queue m FCFS TransactQueueStrategy
+type TransactQueue m a = Queue m FCFS TransactQueueStrategy (Transact a)
 
 -- | The transact queue strategy.
 data TransactQueueStrategy = TransactQueueStrategy
@@ -73,3 +76,8 @@ instance MonadDES m => PriorityQueueStrategy m TransactQueueStrategy Int where
               DLL.listAddLast xs i
          Just xs ->
            DLL.listAddLast xs i
+
+-- | Create a new transact queue
+newTransactQueue :: MonadDES m => Simulation m (TransactQueue m a)
+{-# INLINABLE newTransactQueue #-}
+newTransactQueue = newQueue FCFS TransactQueueStrategy
