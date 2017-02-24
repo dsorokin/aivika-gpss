@@ -22,6 +22,8 @@ module Simulation.Aivika.GPSS.Transact
 import Control.Monad
 import Control.Monad.Trans
 
+import Data.IORef
+
 import Simulation.Aivika
 import Simulation.Aivika.Internal.Specs
 import Simulation.Aivika.Internal.Event
@@ -36,11 +38,11 @@ data Transact a =
              -- ^ The time at which the transact was generated.
              transactPriority :: Int,
              -- ^ The transact priority.
-             transactPreemptionCountRef :: Ref Int,
+             transactPreemptionCountRef :: IORef Int,
              -- ^ How many times the transact is preempted.
-             transactProcessIdRef :: Ref (Maybe ProcessId),
+             transactProcessIdRef :: IORef (Maybe ProcessId),
              -- ^ An identifier of the process that handles the transact at present
-             transactProcessContRef :: Ref (Maybe (FrozenCont ()))
+             transactProcessContRef :: IORef (Maybe (FrozenCont ()))
              -- ^ A continuation of the process that tried to handle the transact.
            }
 
@@ -50,12 +52,12 @@ takeTransact t =
   Process $ \pid ->
   Cont $ \c ->
   Event $ \p ->
-  do pid0 <- invokeEvent p $ readRef (transactProcessIdRef t)
+  do pid0 <- readIORef (transactProcessIdRef t)
      case pid0 of
        Just pid0 -> error "The transact is acquired by another process: takeTransact"
        Nothing   ->
-         do invokeEvent p $ writeRef (transactProcessIdRef t) (Just pid)
-            n <- invokeEvent p $ readRef (transactPreemptionCountRef t)
+         do writeIORef (transactProcessIdRef t) (Just pid)
+            n <- readIORef (transactPreemptionCountRef t)
             if n == 0
               then invokeEvent p $ resumeCont c ()
               else do c <- invokeEvent p $
@@ -63,8 +65,7 @@ takeTransact t =
                            invokeCont c $
                            invokeProcess pid $
                            takeTransact t
-                      invokeEvent p $
-                        writeRef (transactProcessContRef t) (Just c)
+                      writeIORef (transactProcessContRef t) (Just c)
                       forM_ [1 .. n] $ \_ ->
                         invokeEvent p $
                         processPreemptionBegin pid
@@ -75,18 +76,18 @@ releaseTransact t =
   Process $ \pid ->
   Cont $ \c ->
   Event $ \p ->
-  do pid0 <- invokeEvent p $ readRef (transactProcessIdRef t)
+  do pid0 <- readIORef (transactProcessIdRef t)
      case pid0 of
        Nothing ->
          error "The transact is not acquired by any process: releaseTransact"
        Just pid0 | pid0 /= pid ->
          error "The transact is acquired by another process: releaseTransact"
        Just pid0 ->
-         do invokeEvent p $ writeRef (transactProcessIdRef t) Nothing
-            n <- invokeEvent p $ readRef (transactPreemptionCountRef t)
+         do writeIORef (transactProcessIdRef t) Nothing
+            n <- readIORef (transactPreemptionCountRef t)
             unless (n == 0) $
               error "The transact cannot be preempted in this state: releaseTransact"
-            c0 <- invokeEvent p $ readRef (transactProcessContRef t)
+            c0 <- readIORef (transactProcessContRef t)
             case c0 of
               Nothing -> invokeEvent p $ resumeCont c ()
               Just c0 -> error "The transact process cannot be frozen in this state: releaseTransact"
@@ -95,10 +96,10 @@ releaseTransact t =
 transactPreemptionBegin :: Transact a -> Event ()
 transactPreemptionBegin t =
   Event $ \p ->
-  do n <- invokeEvent p $ readRef (transactPreemptionCountRef t)
+  do n <- readIORef (transactPreemptionCountRef t)
      let n' = n + 1
-     n' `seq` invokeEvent p $ writeRef (transactPreemptionCountRef t) n'
-     pid <- invokeEvent p $ readRef (transactProcessIdRef t)
+     n' `seq` writeIORef (transactPreemptionCountRef t) n'
+     pid <- readIORef (transactProcessIdRef t)
      case pid of
        Nothing  -> return ()
        Just pid -> invokeEvent p $ processPreemptionBegin pid
@@ -107,21 +108,21 @@ transactPreemptionBegin t =
 transactPreemptionEnd :: Transact a -> Event ()
 transactPreemptionEnd t =
   Event $ \p ->
-  do n <- invokeEvent p $ readRef (transactPreemptionCountRef t)
+  do n <- readIORef (transactPreemptionCountRef t)
      let n' = n - 1
      unless (n' >= 0) $
        error "The transact preemption count cannot be negative: transactPreemptionEnd"
-     n' `seq` invokeEvent p $ writeRef (transactPreemptionCountRef t) n'
-     pid <- invokeEvent p $ readRef (transactProcessIdRef t)
+     n' `seq` writeIORef (transactPreemptionCountRef t) n'
+     pid <- readIORef (transactProcessIdRef t)
      case pid of
        Nothing  -> return ()
        Just pid ->
          do invokeEvent p $ processPreemptionEnd pid
-            c <- invokeEvent p $ readRef (transactProcessContRef t)
+            c <- readIORef (transactProcessContRef t)
             case c of
               Nothing -> return ()
               Just c  ->
-                do invokeEvent p $ writeRef (transactProcessContRef t) Nothing
+                do writeIORef (transactProcessContRef t) Nothing
                    c <- invokeEvent p $ unfreezeCont c
                    case c of
                      Nothing -> return ()
