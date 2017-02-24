@@ -92,18 +92,8 @@ releaseTransact t =
          "The transact is acquired by another process: releaseTransact"
        Just pid0 ->
          do writeIORef (transactProcessIdRef t) Nothing
-            n <- readIORef (transactPreemptionCountRef t)
-            unless (n == 0) $
-              throwIO $
-              SimulationRetry
-              "The transact cannot be preempted in this state: releaseTransact"
-            c0 <- readIORef (transactProcessContRef t)
-            case c0 of
-              Nothing -> invokeEvent p $ resumeCont c ()
-              Just c0 ->
-                throwIO $
-                SimulationRetry
-                "The transact process cannot be frozen in this state: releaseTransact"
+            writeIORef (transactProcessContRef t) Nothing
+            invokeEvent p $ resumeCont c ()
 
 -- | Preempt the computation that handles the transact.
 transactPreemptionBegin :: Transact a -> Event ()

@@ -93,18 +93,8 @@ releaseTransact t =
          "The transact is acquired by another process: releaseTransact"
        Just pid0 ->
          do invokeEvent p $ writeRef (transactProcessIdRef t) Nothing
-            n <- invokeEvent p $ readRef (transactPreemptionCountRef t)
-            unless (n == 0) $
-              throwComp $
-              SimulationRetry
-              "The transact cannot be preempted in this state: releaseTransact"
-            c0 <- invokeEvent p $ readRef (transactProcessContRef t)
-            case c0 of
-              Nothing -> invokeEvent p $ resumeCont c ()
-              Just c0 ->
-                throwComp $
-                SimulationRetry
-                "The transact process cannot be frozen in this state: releaseTransact"
+            invokeEvent p $ writeRef (transactProcessContRef t) Nothing
+            invokeEvent p $ resumeCont c ()
 
 -- | Preempt the computation that handles the transact.
 transactPreemptionBegin :: MonadDES m => Transact m a -> Event m ()
