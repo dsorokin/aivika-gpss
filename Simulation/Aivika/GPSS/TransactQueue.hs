@@ -29,7 +29,7 @@ import qualified Simulation.Aivika.DoubleLinkedList as DLL
 import Simulation.Aivika.GPSS.Transact
 
 -- | A transact queue.
-type TransactQueue a = Queue FCFS TransactQueueStrategy (Transact a)
+type TransactQueue a = Queue TransactQueueStrategy FCFS (Transact a)
 
 -- | The transact queue strategy.
 data TransactQueueStrategy = TransactQueueStrategy
@@ -80,5 +80,5 @@ instance PriorityQueueStrategy TransactQueueStrategy Int where
 
 -- | Create a new transact queue
 newTransactQueue :: Simulation (TransactQueue a)
-newTransactQueue = newQueue FCFS TransactQueueStrategy
+newTransactQueue = newQueue TransactQueueStrategy FCFS
 
