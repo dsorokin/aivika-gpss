@@ -27,10 +27,12 @@ library
                      Simulation.Aivika.GPSS.Block
                      Simulation.Aivika.GPSS.Internal.Block
                      Simulation.Aivika.GPSS.Transact
+                     Simulation.Aivika.GPSS.TransactQueue
                      Simulation.Aivika.Trans.GPSS
                      Simulation.Aivika.Trans.GPSS.Block
                      Simulation.Aivika.Trans.GPSS.Internal.Block
                      Simulation.Aivika.Trans.GPSS.Transact
+                     Simulation.Aivika.Trans.GPSS.TransactQueue
                      
     build-depends:   base >= 4.2 && < 6,
                      mtl >= 1.1.0.2,
@@ -39,7 +41,8 @@ library
                      aivikasim-transformers >= 1.0
 
     extensions:      MultiParamTypeClasses,
-                     TypeFamilies
+                     TypeFamilies,
+                     FlexibleInstances
                      
     ghc-options:     -O2
 
