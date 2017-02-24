@@ -73,7 +73,14 @@ processorBlock :: Processor (Transact a) (Transact b) -> Block a b
 processorBlock p =
   Block $ \qi qo ->
   let action =
-        do let xs = repeatProcess (dequeue qi)
+        do let deq =
+                 do a <- dequeue qi
+                    takeTransact a
+                    return a
+               enq b =
+                 do releaseTransact b
+                    liftEvent $ enqueue qo b
+               xs = repeatProcess deq
                ys = runProcessor p xs
-           consumeStream (liftEvent . enqueue qo) ys
+           consumeStream enq ys
   in BlockChain { blockChainProcess = action }
