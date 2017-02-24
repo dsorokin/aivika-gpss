@@ -21,6 +21,7 @@ module Simulation.Aivika.GPSS.Transact
 
 import Control.Monad
 import Control.Monad.Trans
+import Control.Exception
 
 import Data.IORef
 
@@ -54,7 +55,10 @@ takeTransact t =
   Event $ \p ->
   do pid0 <- readIORef (transactProcessIdRef t)
      case pid0 of
-       Just pid0 -> error "The transact is acquired by another process: takeTransact"
+       Just pid0 ->
+         throwIO $
+         SimulationRetry
+         "The transact is acquired by another process: takeTransact"
        Nothing   ->
          do writeIORef (transactProcessIdRef t) (Just pid)
             n <- readIORef (transactPreemptionCountRef t)
@@ -79,18 +83,27 @@ releaseTransact t =
   do pid0 <- readIORef (transactProcessIdRef t)
      case pid0 of
        Nothing ->
-         error "The transact is not acquired by any process: releaseTransact"
+         throwIO $
+         SimulationRetry
+         "The transact is not acquired by any process: releaseTransact"
        Just pid0 | pid0 /= pid ->
-         error "The transact is acquired by another process: releaseTransact"
+         throwIO $
+         SimulationRetry
+         "The transact is acquired by another process: releaseTransact"
        Just pid0 ->
          do writeIORef (transactProcessIdRef t) Nothing
             n <- readIORef (transactPreemptionCountRef t)
             unless (n == 0) $
-              error "The transact cannot be preempted in this state: releaseTransact"
+              throwIO $
+              SimulationRetry
+              "The transact cannot be preempted in this state: releaseTransact"
             c0 <- readIORef (transactProcessContRef t)
             case c0 of
               Nothing -> invokeEvent p $ resumeCont c ()
-              Just c0 -> error "The transact process cannot be frozen in this state: releaseTransact"
+              Just c0 ->
+                throwIO $
+                SimulationRetry
+                "The transact process cannot be frozen in this state: releaseTransact"
 
 -- | Preempt the computation that handles the transact.
 transactPreemptionBegin :: Transact a -> Event ()
@@ -111,7 +124,9 @@ transactPreemptionEnd t =
   do n <- readIORef (transactPreemptionCountRef t)
      let n' = n - 1
      unless (n' >= 0) $
-       error "The transact preemption count cannot be negative: transactPreemptionEnd"
+       throwIO $
+       SimulationRetry
+       "The transact preemption count cannot be negative: transactPreemptionEnd"
      n' `seq` writeIORef (transactPreemptionCountRef t) n'
      pid <- readIORef (transactProcessIdRef t)
      case pid of

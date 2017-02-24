@@ -21,6 +21,7 @@ module Simulation.Aivika.Trans.GPSS.Transact
 
 import Control.Monad
 import Control.Monad.Trans
+import Control.Exception
 
 import Simulation.Aivika.Trans
 import Simulation.Aivika.Trans.Internal.Specs
@@ -53,7 +54,10 @@ takeTransact t =
   Event $ \p ->
   do pid0 <- invokeEvent p $ readRef (transactProcessIdRef t)
      case pid0 of
-       Just pid0 -> error "The transact is acquired by another process: takeTransact"
+       Just pid0 ->
+         throwComp $
+         SimulationRetry
+         "The transact is acquired by another process: takeTransact"
        Nothing   ->
          do invokeEvent p $ writeRef (transactProcessIdRef t) (Just pid)
             n <- invokeEvent p $ readRef (transactPreemptionCountRef t)
@@ -80,18 +84,27 @@ releaseTransact t =
   do pid0 <- invokeEvent p $ readRef (transactProcessIdRef t)
      case pid0 of
        Nothing ->
-         error "The transact is not acquired by any process: releaseTransact"
+         throwComp $
+         SimulationRetry
+         "The transact is not acquired by any process: releaseTransact"
        Just pid0 | pid0 /= pid ->
-         error "The transact is acquired by another process: releaseTransact"
+         throwComp $
+         SimulationRetry
+         "The transact is acquired by another process: releaseTransact"
        Just pid0 ->
          do invokeEvent p $ writeRef (transactProcessIdRef t) Nothing
             n <- invokeEvent p $ readRef (transactPreemptionCountRef t)
             unless (n == 0) $
-              error "The transact cannot be preempted in this state: releaseTransact"
+              throwComp $
+              SimulationRetry
+              "The transact cannot be preempted in this state: releaseTransact"
             c0 <- invokeEvent p $ readRef (transactProcessContRef t)
             case c0 of
               Nothing -> invokeEvent p $ resumeCont c ()
-              Just c0 -> error "The transact process cannot be frozen in this state: releaseTransact"
+              Just c0 ->
+                throwComp $
+                SimulationRetry
+                "The transact process cannot be frozen in this state: releaseTransact"
 
 -- | Preempt the computation that handles the transact.
 transactPreemptionBegin :: MonadDES m => Transact m a -> Event m ()
@@ -114,7 +127,9 @@ transactPreemptionEnd t =
   do n <- invokeEvent p $ readRef (transactPreemptionCountRef t)
      let n' = n - 1
      unless (n' >= 0) $
-       error "The transact preemption count cannot be negative: transactPreemptionEnd"
+       throwComp $
+       SimulationRetry
+       "The transact preemption count cannot be negative: transactPreemptionEnd"
      n' `seq` invokeEvent p $ writeRef (transactPreemptionCountRef t) n'
      pid <- invokeEvent p $ readRef (transactProcessIdRef t)
      case pid of
