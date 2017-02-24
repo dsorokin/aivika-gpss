@@ -24,6 +24,8 @@ tested-with:     GHC == 8.0.1
 library
 
     exposed-modules: Simulation.Aivika.GPSS
+                     Simulation.Aivika.GPSS.Block
+                     Simulation.Aivika.GPSS.Internal.Block
                      Simulation.Aivika.GPSS.Transact
                      Simulation.Aivika.Trans.GPSS
                      Simulation.Aivika.Trans.GPSS.Transact

@@ -11,6 +11,8 @@
 --
 module Simulation.Aivika.GPSS
        (-- * Modules
+        module Simulation.Aivika.GPSS.Block,
         module Simulation.Aivika.GPSS.Transact) where
 
+import Simulation.Aivika.GPSS.Block
 import Simulation.Aivika.GPSS.Transact
