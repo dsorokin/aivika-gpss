@@ -11,8 +11,7 @@
 --
 module Simulation.Aivika.GPSS.Block
        (Block(..),
-        GeneratorBlock(..),
-        runBlocks) where
+        GeneratorBlock(..)) where
 
 import Control.Monad
 import Control.Monad.Trans
@@ -31,12 +30,8 @@ data Block a b =
         }
 
 -- | Represents a GPSS generator block.
-data GeneratorBlock a =
-  GeneratorBlock { generatorItemDelay :: Process Double,
-                   -- ^ A computation of the item delay.
-                   generatorItemHandler :: Block a () -> Double -> Event ()
-                   -- ^ Handle the item by the specified block and delay.
-                 }
+newtype GeneratorBlock a =
+  GeneratorBlock { runGeneratorBlock :: Block a () -> Process () }
 
 instance C.Category Block where
 
@@ -51,13 +46,3 @@ instance C.Category Block where
             blockHeadQueueCount = blockHeadQueueCount y,
             blockCanEnter = blockCanEnter y
           }
-
--- | Run the GPSS blocks.
-runBlocks :: GeneratorBlock a -> Block a () -> Process ()
-runBlocks g x =
-  let loop =
-        do dt <- generatorItemDelay g
-           liftEvent $
-             generatorItemHandler g x dt
-           loop
-  in loop
