@@ -37,7 +37,7 @@ import Simulation.Aivika.Internal.Process
 data Transact a =
   Transact { transactValue :: a,
              -- ^ The data of the transact.
-             transactArrivalDelay :: Maybe Double,
+             transactArrivalDelay :: Double,
              -- ^ The delay between the transacts generated.
              transactArrivalTime :: Double,
              -- ^ The time at which the transact was generated.
@@ -56,7 +56,7 @@ newTransact :: a
                -- ^ the transact data
                -> Int
                -- ^ the transact priority
-               -> Maybe Double
+               -> Double
                -- ^ the arrival delay
                -> Event (Transact a)
 newTransact a priority dt =
