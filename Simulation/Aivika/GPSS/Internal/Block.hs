@@ -24,18 +24,22 @@ import Simulation.Aivika.GPSS.Transact
 data Block a b =
   Block { blockProcess :: Transact a -> Process (Transact b),
           -- ^ Process the transact.
-          blockHeadQueueCount :: Event Int
+          blockHeadQueueCount :: Event Int,
           -- ^ Return the block head queue size.
+          blockCanEnter :: Event Bool
+          -- ^ Whether the transact can enter the block.
         }
 
 instance C.Category Block where
 
   id =
     Block { blockProcess = return,
-            blockHeadQueueCount = return 0
+            blockHeadQueueCount = return 0,
+            blockCanEnter = return True
           }
 
   x . y =
     Block { blockProcess = \a -> do { b <- blockProcess y a; blockProcess x b },
-            blockHeadQueueCount = blockHeadQueueCount x
+            blockHeadQueueCount = blockHeadQueueCount y,
+            blockCanEnter = blockCanEnter y
           }
