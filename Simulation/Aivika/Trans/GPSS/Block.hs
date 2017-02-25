@@ -10,8 +10,6 @@
 -- This module defines a GPSS block.
 --
 module Simulation.Aivika.Trans.GPSS.Block
-       (Block,
-        blockProcessor,
-        processorBlock) where
+       (Block) where
 
 import Simulation.Aivika.Trans.GPSS.Internal.Block
