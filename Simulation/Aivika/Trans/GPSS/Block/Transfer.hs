@@ -12,13 +12,19 @@
 module Simulation.Aivika.Trans.GPSS.Block.Transfer
        (transferBlock) where
 
+import Simulation.Aivika.Trans
 import Simulation.Aivika.Trans.GPSS.Internal.Block
 
 -- | This is the GPSS construct
 --
 -- @TRANSFER ,New_Place@
-transferBlock :: Block m a b
+transferBlock :: MonadDES m
+                 => Block m a ()
                  -- ^ a new place
                  -> Block m a b
 {-# INLINABLE transferBlock #-}
-transferBlock = id
+transferBlock x =
+  Block { blockProcess = \a -> transferProcess (blockProcess x a),
+          blockHeadQueueCount = blockHeadQueueCount x,
+          blockCanEnter = blockCanEnter x
+        }
