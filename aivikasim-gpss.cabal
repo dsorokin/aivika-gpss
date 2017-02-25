@@ -26,13 +26,11 @@ library
     exposed-modules: Simulation.Aivika.GPSS
                      Simulation.Aivika.GPSS.Block
                      Simulation.Aivika.GPSS.Block.Transfer
-                     Simulation.Aivika.GPSS.Internal.Block
                      Simulation.Aivika.GPSS.Transact
                      Simulation.Aivika.GPSS.TransactQueueStrategy
                      Simulation.Aivika.Trans.GPSS
                      Simulation.Aivika.Trans.GPSS.Block
                      Simulation.Aivika.Trans.GPSS.Block.Transfer
-                     Simulation.Aivika.Trans.GPSS.Internal.Block
                      Simulation.Aivika.Trans.GPSS.Transact
                      Simulation.Aivika.Trans.GPSS.TransactQueueStrategy
                      

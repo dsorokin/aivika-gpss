@@ -10,6 +10,34 @@
 -- This module defines a GPSS block.
 --
 module Simulation.Aivika.GPSS.Block
-       (Block) where
+       (Block(..)) where
 
-import Simulation.Aivika.GPSS.Internal.Block
+import Control.Monad
+import Control.Monad.Trans
+import qualified Control.Category as C
+
+import Simulation.Aivika
+
+-- | Represents a GPSS block.
+data Block a b =
+  Block { blockProcess :: a -> Process b,
+          -- ^ Process the transact.
+          blockHeadQueueCount :: Event Int,
+          -- ^ Return the block head queue size.
+          blockCanEnter :: Event Bool
+          -- ^ Whether the transact can enter the block.
+        }
+
+instance C.Category Block where
+
+  id =
+    Block { blockProcess = return,
+            blockHeadQueueCount = return 0,
+            blockCanEnter = return True
+          }
+
+  x . y =
+    Block { blockProcess = \a -> do { b <- blockProcess y a; blockProcess x b },
+            blockHeadQueueCount = blockHeadQueueCount y,
+            blockCanEnter = blockCanEnter y
+          }

@@ -13,7 +13,7 @@ module Simulation.Aivika.Trans.GPSS.Block.Transfer
        (transferBlock) where
 
 import Simulation.Aivika.Trans
-import Simulation.Aivika.Trans.GPSS.Internal.Block
+import Simulation.Aivika.Trans.GPSS.Block
 
 -- | This is the GPSS construct
 --
