@@ -10,7 +10,9 @@
 -- This module defines a GPSS block.
 --
 module Simulation.Aivika.Trans.GPSS.Block
-       (Block(..)) where
+       (Block(..),
+        GeneratorBlock(..),
+        runBlocks) where
 
 import Control.Monad
 import Control.Monad.Trans
@@ -21,12 +23,20 @@ import Simulation.Aivika.Trans
 -- | Represents a GPSS block.
 data Block m a b =
   Block { blockProcess :: a -> Process m b,
-          -- ^ Process the transact.
+          -- ^ Process the item.
           blockHeadQueueCount :: Event m Int,
           -- ^ Return the block head queue size.
           blockCanEnter :: Event m Bool
-          -- ^ Whether the transact can enter the block.
+          -- ^ Whether an item can enter the block.
         }
+
+-- | Represents a GPSS generator block.
+data GeneratorBlock m a =
+  GeneratorBlock { generatorItemDelay :: Process m Double,
+                   -- ^ A computation of the item delay.
+                   generatorItemHandler :: Block m a () -> Double -> Event m ()
+                   -- ^ Handle the item by the specified block and delay.
+                 }
 
 instance MonadDES m => C.Category (Block m) where
 
@@ -43,3 +53,14 @@ instance MonadDES m => C.Category (Block m) where
             blockHeadQueueCount = blockHeadQueueCount y,
             blockCanEnter = blockCanEnter y
           }
+
+-- | Run the GPSS blocks.
+runBlocks :: MonadDES m => GeneratorBlock m a -> Block m a () -> Process m ()
+{-# INLINABLE runBlocks #-}
+runBlocks g x =
+  let loop =
+        do dt <- generatorItemDelay g
+           liftEvent $
+             generatorItemHandler g x dt
+           loop
+  in loop
