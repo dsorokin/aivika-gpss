@@ -36,7 +36,7 @@ import Simulation.Aivika.Trans.Internal.Process
 data Transact m a =
   Transact { transactValue :: a,
              -- ^ The data of the transact.
-             transactArrivalDelay :: Double,
+             transactArrivalDelay :: Maybe Double,
              -- ^ The delay between the transacts generated.
              transactArrivalTime :: Double,
              -- ^ The time at which the transact was generated.
@@ -52,23 +52,20 @@ data Transact m a =
 
 -- | Create a new transact.
 newTransact :: MonadDES m
-               => a
-               -- ^ the transact data
+               => Arrival a
+               -- ^ the arrival data
                -> Int
                -- ^ the transact priority
-               -> Double
-               -- ^ the arrival delay
-               -> Event m (Transact m a)
+               -> Simulation m (Transact m a)
 {-# INLINABLE newTransact #-}
-newTransact a priority dt =
-  Event $ \p ->
-  do let r = pointRun p
-     r0 <- invokeSimulation r $ newRef 0
+newTransact a priority =
+  Simulation $ \r ->
+  do r0 <- invokeSimulation r $ newRef 0
      r1 <- invokeSimulation r $ newRef Nothing
      r2 <- invokeSimulation r $ newRef Nothing
-     return Transact { transactValue = a,
-                       transactArrivalDelay = dt,
-                       transactArrivalTime = pointTime p,
+     return Transact { transactValue = arrivalValue a,
+                       transactArrivalDelay = arrivalDelay a,
+                       transactArrivalTime = arrivalTime a,
                        transactPriority = priority,
                        transactPreemptionCountRef = r0,
                        transactProcessIdRef = r1,

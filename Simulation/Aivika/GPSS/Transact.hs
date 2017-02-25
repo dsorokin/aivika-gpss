@@ -29,6 +29,7 @@ import Data.IORef
 
 import Simulation.Aivika
 import Simulation.Aivika.Internal.Specs
+import Simulation.Aivika.Internal.Simulation
 import Simulation.Aivika.Internal.Event
 import Simulation.Aivika.Internal.Cont
 import Simulation.Aivika.Internal.Process
@@ -37,7 +38,7 @@ import Simulation.Aivika.Internal.Process
 data Transact a =
   Transact { transactValue :: a,
              -- ^ The data of the transact.
-             transactArrivalDelay :: Double,
+             transactArrivalDelay :: Maybe Double,
              -- ^ The delay between the transacts generated.
              transactArrivalTime :: Double,
              -- ^ The time at which the transact was generated.
@@ -52,21 +53,19 @@ data Transact a =
            }
 
 -- | Create a new transact.
-newTransact :: a
-               -- ^ the transact data
+newTransact :: Arrival a
+               -- ^ the arrival data
                -> Int
                -- ^ the transact priority
-               -> Double
-               -- ^ the arrival delay
-               -> Event (Transact a)
-newTransact a priority dt =
-  Event $ \p ->
+               -> Simulation (Transact a)
+newTransact a priority =
+  Simulation $ \r ->
   do r0 <- newIORef 0
      r1 <- newIORef Nothing
      r2 <- newIORef Nothing
-     return Transact { transactValue = a,
-                       transactArrivalDelay = dt,
-                       transactArrivalTime = pointTime p,
+     return Transact { transactValue = arrivalValue a,
+                       transactArrivalDelay = arrivalDelay a,
+                       transactArrivalTime = arrivalTime a,
                        transactPriority = priority,
                        transactPreemptionCountRef = r0,
                        transactProcessIdRef = r1,
