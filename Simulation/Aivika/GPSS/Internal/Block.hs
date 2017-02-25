@@ -10,77 +10,32 @@
 -- This module defines a GPSS block.
 --
 module Simulation.Aivika.GPSS.Internal.Block
-       (Block(..),
-        BlockChain(..),
-        blockProcessor,
-        processorBlock) where
+       (Block(..)) where
 
 import Control.Monad
 import Control.Monad.Trans
 import qualified Control.Category as C
 
 import Simulation.Aivika
-import Simulation.Aivika.Queue.Infinite.Base
 
 import Simulation.Aivika.GPSS.Transact
 
 -- | Represents a GPSS block.
-newtype Block a b =
-  Block { unBlock :: FCFSQueue (Transact a) -> FCFSQueue (Transact b) -> BlockChain
-                     -- ^ Unwrap the block.
+data Block a b =
+  Block { blockProcess :: Transact a -> Process (Transact b),
+          -- ^ Process the transact.
+          blockHeadQueueCount :: Event Int
+          -- ^ Return the block head queue size.
         }
 
--- | Represents the block chain.
-data BlockChain =
-  BlockChain { blockChainProcess :: Process ()
-               -- ^ The block chain process
-             }
-  
 instance C.Category Block where
 
   id =
-    Block $ \qi qo ->
-    let action =
-          do a <- dequeue qi
-             liftEvent $ enqueue qo a
-             action
-    in BlockChain { blockChainProcess = action }
+    Block { blockProcess = return,
+            blockHeadQueueCount = return 0
+          }
 
   x . y =
-    Block $ \qi qo ->
-    let action =
-          do qm <- liftSimulation newFCFSQueue
-             let ch1 = unBlock y qi qm
-                 ch2 = unBlock x qm qo
-             spawnProcess $ blockChainProcess ch1
-             spawnProcess $ blockChainProcess ch2
-    in BlockChain { blockChainProcess = action }
-
--- | Return the block processor.
-blockProcessor :: Block a b -> Processor (Transact a) (Transact b)
-blockProcessor b =
-  Processor $ \xs ->
-  Cons $
-  do qi <- liftSimulation newFCFSQueue
-     qo <- liftSimulation newFCFSQueue
-     let ch = unBlock b qi qo
-     spawnProcess $ blockChainProcess ch
-     spawnProcess $ consumeStream (liftEvent . enqueue qi) xs
-     runStream $ repeatProcess (dequeue qo)
-
--- | Return the processor block.
-processorBlock :: Processor (Transact a) (Transact b) -> Block a b
-processorBlock p =
-  Block $ \qi qo ->
-  let action =
-        do let deq =
-                 do a <- dequeue qi
-                    takeTransact a
-                    return a
-               enq b =
-                 do releaseTransact b
-                    liftEvent $ enqueue qo b
-               xs = repeatProcess deq
-               ys = runProcessor p xs
-           consumeStream enq ys
-  in BlockChain { blockChainProcess = action }
+    Block { blockProcess = \a -> do { b <- blockProcess y a; blockProcess x b },
+            blockHeadQueueCount = blockHeadQueueCount x
+          }
