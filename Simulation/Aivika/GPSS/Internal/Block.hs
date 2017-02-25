@@ -18,11 +18,9 @@ import qualified Control.Category as C
 
 import Simulation.Aivika
 
-import Simulation.Aivika.GPSS.Transact
-
 -- | Represents a GPSS block.
 data Block a b =
-  Block { blockProcess :: Transact a -> Process (Transact b),
+  Block { blockProcess :: a -> Process b,
           -- ^ Process the transact.
           blockHeadQueueCount :: Event Int,
           -- ^ Return the block head queue size.
