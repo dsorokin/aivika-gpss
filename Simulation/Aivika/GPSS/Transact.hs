@@ -12,8 +12,10 @@
 module Simulation.Aivika.GPSS.Transact
        (Transact,
         transactValue,
+        transactArrivalDelay,
         transactArrivalTime,
         transactPriority,
+        newTransact,
         takeTransact,
         releaseTransact,
         transactPreemptionBegin,
@@ -35,6 +37,8 @@ import Simulation.Aivika.Internal.Process
 data Transact a =
   Transact { transactValue :: a,
              -- ^ The data of the transact.
+             transactArrivalDelay :: Maybe Double,
+             -- ^ The delay between the transacts generated.
              transactArrivalTime :: Double,
              -- ^ The time at which the transact was generated.
              transactPriority :: Int,
@@ -46,6 +50,28 @@ data Transact a =
              transactProcessContRef :: IORef (Maybe (FrozenCont ()))
              -- ^ A continuation of the process that tried to handle the transact.
            }
+
+-- | Create a new transact.
+newTransact :: a
+               -- ^ the transact data
+               -> Int
+               -- ^ the transact priority
+               -> Maybe Double
+               -- ^ the arrival delay
+               -> Event (Transact a)
+newTransact a priority dt =
+  Event $ \p ->
+  do r0 <- newIORef 0
+     r1 <- newIORef Nothing
+     r2 <- newIORef Nothing
+     return Transact { transactValue = a,
+                       transactArrivalDelay = dt,
+                       transactArrivalTime = pointTime p,
+                       transactPriority = priority,
+                       transactPreemptionCountRef = r0,
+                       transactProcessIdRef = r1,
+                       transactProcessContRef = r2
+                     }
 
 -- | Take the transact.
 takeTransact :: Transact a -> Process ()

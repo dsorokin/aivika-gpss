@@ -12,8 +12,10 @@
 module Simulation.Aivika.Trans.GPSS.Transact
        (Transact,
         transactValue,
+        transactArrivalDelay,
         transactArrivalTime,
         transactPriority,
+        newTransact,
         takeTransact,
         releaseTransact,
         transactPreemptionBegin,
@@ -25,6 +27,7 @@ import Control.Exception
 
 import Simulation.Aivika.Trans
 import Simulation.Aivika.Trans.Internal.Specs
+import Simulation.Aivika.Trans.Internal.Simulation
 import Simulation.Aivika.Trans.Internal.Event
 import Simulation.Aivika.Trans.Internal.Cont
 import Simulation.Aivika.Trans.Internal.Process
@@ -33,6 +36,8 @@ import Simulation.Aivika.Trans.Internal.Process
 data Transact m a =
   Transact { transactValue :: a,
              -- ^ The data of the transact.
+             transactArrivalDelay :: Maybe Double,
+             -- ^ The delay between the transacts generated.
              transactArrivalTime :: Double,
              -- ^ The time at which the transact was generated.
              transactPriority :: Int,
@@ -44,6 +49,31 @@ data Transact m a =
              transactProcessContRef :: Ref m (Maybe (FrozenCont m ()))
              -- ^ A continuation of the process that tried to handle the transact.
            }
+
+-- | Create a new transact.
+newTransact :: MonadDES m
+               => a
+               -- ^ the transact data
+               -> Int
+               -- ^ the transact priority
+               -> Maybe Double
+               -- ^ the arrival delay
+               -> Event m (Transact m a)
+{-# INLINABLE newTransact #-}
+newTransact a priority dt =
+  Event $ \p ->
+  do let r = pointRun p
+     r0 <- invokeSimulation r $ newRef 0
+     r1 <- invokeSimulation r $ newRef Nothing
+     r2 <- invokeSimulation r $ newRef Nothing
+     return Transact { transactValue = a,
+                       transactArrivalDelay = dt,
+                       transactArrivalTime = pointTime p,
+                       transactPriority = priority,
+                       transactPreemptionCountRef = r0,
+                       transactProcessIdRef = r1,
+                       transactProcessContRef = r2
+                     }
 
 -- | Take the transact.
 takeTransact :: MonadDES m => Transact m a -> Process m ()
