@@ -17,5 +17,7 @@ import Simulation.Aivika.GPSS.Internal.Block
 -- | This is the GPSS construct
 --
 -- @TRANSFER ,New_Place@
-transferBlock :: Block a b -> Block a b
+transferBlock :: Block a b
+                 -- ^ a new place
+                 -> Block a b
 transferBlock = id
