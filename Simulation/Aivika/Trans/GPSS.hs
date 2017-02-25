@@ -13,12 +13,14 @@ module Simulation.Aivika.Trans.GPSS
        (-- * Modules
         module Simulation.Aivika.Trans.GPSS.Block,
         module Simulation.Aivika.Trans.GPSS.Block.Generate,
+        module Simulation.Aivika.Trans.GPSS.Block.Terminate,
         module Simulation.Aivika.Trans.GPSS.Block.Transfer,
         module Simulation.Aivika.Trans.GPSS.Transact,
         module Simulation.Aivika.Trans.GPSS.TransactQueueStrategy) where
 
 import Simulation.Aivika.Trans.GPSS.Block
 import Simulation.Aivika.Trans.GPSS.Block.Generate
+import Simulation.Aivika.Trans.GPSS.Block.Terminate
 import Simulation.Aivika.Trans.GPSS.Block.Transfer
 import Simulation.Aivika.Trans.GPSS.Transact
 import Simulation.Aivika.Trans.GPSS.TransactQueueStrategy
