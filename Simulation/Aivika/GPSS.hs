@@ -12,7 +12,9 @@
 module Simulation.Aivika.GPSS
        (-- * Modules
         module Simulation.Aivika.GPSS.Block,
-        module Simulation.Aivika.GPSS.Transact) where
+        module Simulation.Aivika.GPSS.Transact,
+        module Simulation.Aivika.GPSS.TransactQueueStrategy) where
 
 import Simulation.Aivika.GPSS.Block
 import Simulation.Aivika.GPSS.Transact
+import Simulation.Aivika.GPSS.TransactQueueStrategy

@@ -2,19 +2,17 @@
 {-# LANGUAGE TypeFamilies, MultiParamTypeClasses #-}
 
 -- |
--- Module     : Simulation.Aivika.GPSS.TransactQueue
+-- Module     : Simulation.Aivika.GPSS.TransactQueueStrategy
 -- Copyright  : Copyright (c) 2017, David Sorokin <david.sorokin@gmail.com>
 -- License    : AllRightsReserved
 -- Maintainer : David Sorokin <david.sorokin@gmail.com>
 -- Stability  : experimental
 -- Tested with: GHC 8.0.2
 --
--- This module defines a GPSS transact queue.
+-- This module defines a GPSS transact queue strategy.
 --
-module Simulation.Aivika.GPSS.TransactQueue
-       (TransactQueue,
-        TransactQueueStrategy,
-        newTransactQueue) where
+module Simulation.Aivika.GPSS.TransactQueueStrategy
+       (TransactQueueStrategy) where
 
 import Control.Monad
 import Control.Monad.Trans
@@ -23,11 +21,7 @@ import Data.IORef
 import qualified Data.IntMap as M
 
 import Simulation.Aivika
-import Simulation.Aivika.Queue.Infinite.Base
 import qualified Simulation.Aivika.DoubleLinkedList as DLL
-
--- | A transact queue.
-type TransactQueue a = Queue TransactQueueStrategy FCFS a
 
 -- | The transact queue strategy.
 data TransactQueueStrategy = TransactQueueStrategy
@@ -75,8 +69,3 @@ instance PriorityQueueStrategy TransactQueueStrategy Int where
               DLL.listAddLast xs i
          Just xs ->
            DLL.listAddLast xs i
-
--- | Create a new transact queue
-newTransactQueue :: Simulation (TransactQueue a)
-newTransactQueue = newQueue TransactQueueStrategy FCFS
-
