@@ -23,44 +23,62 @@ import Simulation.Aivika.Trans
 import qualified Simulation.Aivika.Trans.DoubleLinkedList as DLL
 
 -- | The transact queue strategy.
-data TransactQueueStrategy = TransactQueueStrategy
+data TransactQueueStrategy = InnerFCFSTransactQueueStrategy
+                             -- ^ sorted by priority but then by FCSF (FIFO)
+                             -- within transacts of the same priority
+                           | InnerLCFSTransactQueueStrategy
+                             -- ^ sorted by priority but then by LCFS (LIFO)
+                             -- within transacts of the same priority
 
 -- | An implementation of the 'QueueStrategy' class.
 instance MonadDES m => QueueStrategy m TransactQueueStrategy where
 
   -- | A queue used by the 'TransactQueueStrategy' strategy.
   data StrategyQueue m TransactQueueStrategy a =
-    TransactStrategyQueue (Ref m (M.IntMap (DLL.DoubleLinkedList m a)))
+    TransactStrategyQueue { transactStrategy :: TransactQueueStrategy,
+                            -- ^ the strategy itself
+                            transactStrategyQueue :: Ref m (M.IntMap (DLL.DoubleLinkedList m a))
+                            -- ^ the transact queue
+                          }
 
   {-# INLINABLE newStrategyQueue #-}
   newStrategyQueue s =
     do r <- newRef M.empty
-       return $ TransactStrategyQueue r
+       return $ TransactStrategyQueue s r
 
   {-# INLINABLE strategyQueueNull #-}
-  strategyQueueNull (TransactStrategyQueue r) =
-    do m <- readRef r
+  strategyQueueNull q =
+    do m <- readRef (transactStrategyQueue q)
        return $ M.null m
 
 instance MonadDES m => DequeueStrategy m TransactQueueStrategy where
 
   {-# INLINABLE strategyDequeue #-}
-  strategyDequeue (TransactStrategyQueue r) =
-    do m <- readRef r
+  strategyDequeue q =
+    do m <- readRef (transactStrategyQueue q)
        let (p, xs) = M.findMax m
-       i <- DLL.listFirst xs
-       DLL.listRemoveFirst xs
+           extract =
+             case transactStrategy q of
+               InnerFCFSTransactQueueStrategy ->
+                 do i <- DLL.listFirst xs
+                    DLL.listRemoveFirst xs
+                    return i
+               InnerLCFSTransactQueueStrategy ->
+                 do i <- DLL.listLast xs
+                    DLL.listRemoveLast xs
+                    return i
+       i <- extract
        empty <- DLL.listNull xs
        when empty $
-         modifyRef r $
+         modifyRef (transactStrategyQueue q) $
          M.delete p
        return i
 
 instance MonadDES m => PriorityQueueStrategy m TransactQueueStrategy Int where
 
   {-# INLINABLE strategyEnqueueWithPriority #-}
-  strategyEnqueueWithPriority (TransactStrategyQueue r) p i =
-    do m <- readRef r
+  strategyEnqueueWithPriority q p i =
+    do m <- readRef (transactStrategyQueue q)
        let xs = M.lookup p m
        case xs of
          Nothing ->

@@ -24,44 +24,62 @@ import Simulation.Aivika
 import qualified Simulation.Aivika.DoubleLinkedList as DLL
 
 -- | The transact queue strategy.
-data TransactQueueStrategy = TransactQueueStrategy
+data TransactQueueStrategy = InnerFCFSTransactQueueStrategy
+                             -- ^ sorted by priority but then by FCSF (FIFO)
+                             -- within transacts of the same priority
+                           | InnerLCFSTransactQueueStrategy
+                             -- ^ sorted by priority but then by LCFS (LIFO)
+                             -- within transacts of the same priority
 
 -- | An implementation of the 'QueueStrategy' class.
 instance QueueStrategy TransactQueueStrategy where
 
   -- | A queue used by the 'TransactQueueStrategy' strategy.
   data StrategyQueue TransactQueueStrategy a =
-    TransactStrategyQueue (IORef (M.IntMap (DLL.DoubleLinkedList a)))
+    TransactStrategyQueue { transactStrategy :: TransactQueueStrategy,
+                            -- ^ the strategy itself
+                            transactStrategyQueue :: IORef (M.IntMap (DLL.DoubleLinkedList a))
+                            -- ^ the transact queue
+                          }
 
   newStrategyQueue s =
     liftIO $
     do r <- newIORef M.empty
-       return $ TransactStrategyQueue r
+       return $ TransactStrategyQueue s r
 
-  strategyQueueNull (TransactStrategyQueue r) =
+  strategyQueueNull q =
     liftIO $
-    do m <- readIORef r
+    do m <- readIORef (transactStrategyQueue q)
        return $ M.null m
 
 instance DequeueStrategy TransactQueueStrategy where
 
-  strategyDequeue (TransactStrategyQueue r) =
+  strategyDequeue q =
     liftIO $ 
-    do m <- readIORef r
+    do m <- readIORef (transactStrategyQueue q)
        let (p, xs) = M.findMax m
-       i <- DLL.listFirst xs
-       DLL.listRemoveFirst xs
+           extract =
+             case transactStrategy q of
+               InnerFCFSTransactQueueStrategy ->
+                 do i <- DLL.listFirst xs
+                    DLL.listRemoveFirst xs
+                    return i
+               InnerLCFSTransactQueueStrategy ->
+                 do i <- DLL.listLast xs
+                    DLL.listRemoveLast xs
+                    return i
+       i <- extract
        empty <- DLL.listNull xs
        when empty $
-         modifyIORef r $
+         modifyIORef (transactStrategyQueue q) $
          M.delete p
        return i
 
 instance PriorityQueueStrategy TransactQueueStrategy Int where
 
-  strategyEnqueueWithPriority (TransactStrategyQueue r) p i =
+  strategyEnqueueWithPriority q p i =
     liftIO $
-    do m <- readIORef r
+    do m <- readIORef (transactStrategyQueue q)
        let xs = M.lookup p m
        case xs of
          Nothing ->
