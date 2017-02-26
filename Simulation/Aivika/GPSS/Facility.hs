@@ -9,7 +9,7 @@
 --
 -- This module defines the GPSS Facility entity.
 --
-module Simulation.Aivika.Resource.Facility
+module Simulation.Aivika.GPSS.Facility
        (-- * Facility Type
         Facility,
         FacilityPreemptMode(..),
