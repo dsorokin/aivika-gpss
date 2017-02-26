@@ -52,6 +52,11 @@ data Transact m a =
              -- ^ A continuation of the process that tried to handle the transact.
            }
 
+instance MonadDES m => Eq (Transact m a) where
+
+  {-# INLINABLE (==) #-}
+  x == y = (transactProcessIdRef x) == (transactProcessIdRef y)
+
 -- | Create a new transact.
 newTransact :: MonadDES m
                => Arrival a

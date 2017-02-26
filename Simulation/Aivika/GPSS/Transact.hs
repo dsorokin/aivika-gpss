@@ -54,6 +54,9 @@ data Transact a =
              -- ^ A continuation of the process that tried to handle the transact.
            }
 
+instance Eq (Transact a) where
+  x == y = (transactProcessIdRef x) == (transactProcessIdRef y)
+
 -- | Create a new transact.
 newTransact :: Arrival a
                -- ^ the arrival data
