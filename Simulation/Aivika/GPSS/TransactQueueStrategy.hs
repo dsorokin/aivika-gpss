@@ -12,7 +12,9 @@
 -- This module defines a GPSS transact queue strategy.
 --
 module Simulation.Aivika.GPSS.TransactQueueStrategy
-       (TransactQueueStrategy(..)) where
+       (TransactQueueStrategy(..),
+        transactStrategyQueueDeleteBy,
+        transactStrategyQueueContainsBy) where
 
 import Control.Monad
 import Control.Monad.Trans
@@ -87,3 +89,35 @@ instance PriorityQueueStrategy TransactQueueStrategy Int where
               DLL.listAddLast xs i
          Just xs ->
            DLL.listAddLast xs i
+
+-- | Try to delete the transact by the specified priority and satisfying to the provided predicate.
+transactStrategyQueueDeleteBy :: StrategyQueue TransactQueueStrategy a
+                                 -- ^ the queue
+                                 -> Int
+                                 -- ^ the transact priority
+                                 -> (a -> Bool)
+                                 -- ^ the predicate
+                                 -> Event (Maybe a)
+transactStrategyQueueDeleteBy q priority pred =
+  liftIO $
+  do m <- readIORef (transactStrategyQueue q)
+     let xs = M.lookup priority m
+     case xs of
+       Nothing -> return Nothing
+       Just xs -> DLL.listRemoveBy xs pred
+
+-- | Test whether the queue contains a transact with the specified priority satisfying the provided predicate.
+transactStrategyQueueContainsBy :: StrategyQueue TransactQueueStrategy a
+                                   -- ^ the queue
+                                   -> Int
+                                   -- ^ the transact priority
+                                   -> (a -> Bool)
+                                   -- ^ the predicate
+                                   -> Event (Maybe a)
+transactStrategyQueueContainsBy q priority pred =
+  liftIO $
+  do m <- readIORef (transactStrategyQueue q)
+     let xs = M.lookup priority m
+     case xs of
+       Nothing -> return Nothing
+       Just xs -> DLL.listContainsBy xs pred

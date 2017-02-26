@@ -12,7 +12,9 @@
 -- This module defines a GPSS transact queue strategy.
 --
 module Simulation.Aivika.Trans.GPSS.TransactQueueStrategy
-       (TransactQueueStrategy(..)) where
+       (TransactQueueStrategy(..),
+        transactStrategyQueueDeleteBy,
+        transactStrategyQueueContainsBy) where
 
 import Control.Monad
 import Control.Monad.Trans
@@ -86,3 +88,37 @@ instance MonadDES m => PriorityQueueStrategy m TransactQueueStrategy Int where
               DLL.listAddLast xs i
          Just xs ->
            DLL.listAddLast xs i
+
+-- | Try to delete the transact by the specified priority and satisfying to the provided predicate.
+transactStrategyQueueDeleteBy :: MonadDES m
+                                 => StrategyQueue m TransactQueueStrategy a
+                                 -- ^ the queue
+                                 -> Int
+                                 -- ^ the transact priority
+                                 -> (a -> Bool)
+                                 -- ^ the predicate
+                                 -> Event m (Maybe a)
+{-# INLINABLE transactStrategyQueueDeleteBy #-}
+transactStrategyQueueDeleteBy q priority pred =
+  do m <- readRef (transactStrategyQueue q)
+     let xs = M.lookup priority m
+     case xs of
+       Nothing -> return Nothing
+       Just xs -> DLL.listRemoveBy xs pred
+
+-- | Test whether the queue contains a transact with the specified priority satisfying the provided predicate.
+transactStrategyQueueContainsBy :: MonadDES m
+                                   => StrategyQueue m TransactQueueStrategy a
+                                   -- ^ the queue
+                                   -> Int
+                                   -- ^ the transact priority
+                                   -> (a -> Bool)
+                                   -- ^ the predicate
+                                   -> Event m (Maybe a)
+{-# INLINABLE transactStrategyQueueContainsBy #-}
+transactStrategyQueueContainsBy q priority pred =
+  do m <- readRef (transactStrategyQueue q)
+     let xs = M.lookup priority m
+     case xs of
+       Nothing -> return Nothing
+       Just xs -> DLL.listContainsBy xs pred
