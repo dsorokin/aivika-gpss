@@ -12,7 +12,7 @@
 -- This module defines a GPSS transact queue strategy.
 --
 module Simulation.Aivika.Trans.GPSS.TransactQueueStrategy
-       (TransactQueueStrategy) where
+       (TransactQueueStrategy(..)) where
 
 import Control.Monad
 import Control.Monad.Trans
