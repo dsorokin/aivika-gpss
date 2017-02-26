@@ -16,6 +16,7 @@ module Simulation.Aivika.GPSS
         module Simulation.Aivika.GPSS.Block.Generate,
         module Simulation.Aivika.GPSS.Block.Terminate,
         module Simulation.Aivika.GPSS.Block.Transfer,
+        module Simulation.Aivika.GPSS.Facility,
         module Simulation.Aivika.GPSS.Transact,
         module Simulation.Aivika.GPSS.TransactQueueStrategy) where
 
@@ -24,5 +25,6 @@ import Simulation.Aivika.GPSS.Block.Advance
 import Simulation.Aivika.GPSS.Block.Generate
 import Simulation.Aivika.GPSS.Block.Terminate
 import Simulation.Aivika.GPSS.Block.Transfer
+import Simulation.Aivika.GPSS.Facility
 import Simulation.Aivika.GPSS.Transact
 import Simulation.Aivika.GPSS.TransactQueueStrategy
