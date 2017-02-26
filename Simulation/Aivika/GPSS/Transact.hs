@@ -19,7 +19,9 @@ module Simulation.Aivika.GPSS.Transact
         takeTransact,
         releaseTransact,
         transactPreemptionBegin,
-        transactPreemptionEnd) where
+        transactPreemptionEnd,
+        requireTransactProcessId,
+        transferTransact) where
 
 import Control.Monad
 import Control.Monad.Trans
@@ -157,3 +159,29 @@ transactPreemptionEnd t =
                    case c of
                      Nothing -> return ()
                      Just c  -> invokeEvent p $ enqueueEvent (pointTime p) $ resumeCont c ()
+
+-- | Require to return an identifier of the process associated with the transact.
+requireTransactProcessId :: Transact a -> Event ProcessId
+requireTransactProcessId t =
+  Event $ \p ->
+  do a <- readIORef (transactProcessIdRef t)
+     case a of
+       Nothing ->
+         throwIO $
+         SimulationRetry
+         "The transact must be associated with any process: requireTransactProcessId"
+       Just pid ->
+         return pid
+
+-- | Like the GoTo statement, it associates the transact with another process.
+transferTransact :: Transact a -> Process () -> Event ()
+transferTransact t transfer =
+  Event $ \p ->
+  do pid <- invokeEvent p $ requireTransactProcessId t
+     invokeEvent p $ cancelProcessWithId pid
+     writeIORef (transactProcessIdRef t) Nothing
+     writeIORef (transactProcessContRef t) Nothing
+     invokeEvent p $
+       runProcess $
+       do takeTransact t
+          transferProcess transfer
