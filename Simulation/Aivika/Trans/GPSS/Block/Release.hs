@@ -24,5 +24,6 @@ releaseBlock :: MonadDES m
                 => Facility m a
                 -- ^ the facility
                 -> Block m (Transact m a) (Transact m a)
+{-# INLINABLE releaseBlock #-}
 releaseBlock r =
   Block { blockProcess = \a -> releaseFacility r a >> return a }
