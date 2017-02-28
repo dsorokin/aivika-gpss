@@ -21,11 +21,15 @@ module Simulation.Aivika.Trans.GPSS.Transact
         transactPreemptionBegin,
         transactPreemptionEnd,
         requireTransactProcessId,
-        transferTransact) where
+        transferTransact,
+        registerTransactQueueEntry,
+        unregisterTransactQueueEntry) where
 
 import Control.Monad
 import Control.Monad.Trans
 import Control.Exception
+
+import qualified Data.HashMap.Lazy as HM
 
 import Simulation.Aivika.Trans
 import Simulation.Aivika.Trans.Internal.Specs
@@ -33,6 +37,8 @@ import Simulation.Aivika.Trans.Internal.Simulation
 import Simulation.Aivika.Trans.Internal.Event
 import Simulation.Aivika.Trans.Internal.Cont
 import Simulation.Aivika.Trans.Internal.Process
+
+import {-# SOURCE #-} Simulation.Aivika.Trans.GPSS.Queue
 
 -- | Represents a GPSS transact.
 data Transact m a =
@@ -48,8 +54,10 @@ data Transact m a =
              -- ^ How many times the transact is preempted.
              transactProcessIdRef :: Ref m (Maybe (ProcessId m)),
              -- ^ An identifier of the process that handles the transact at present
-             transactProcessContRef :: Ref m (Maybe (FrozenCont m ()))
+             transactProcessContRef :: Ref m (Maybe (FrozenCont m ())),
              -- ^ A continuation of the process that tried to handle the transact.
+             transactQueueEntryRef :: Ref m (HM.HashMap (Queue m) (QueueEntry m))
+             -- ^ The queue entries registered by the the transact.
            }
 
 instance MonadDES m => Eq (Transact m a) where
@@ -70,13 +78,15 @@ newTransact a priority =
   do r0 <- invokeSimulation r $ newRef 0
      r1 <- invokeSimulation r $ newRef Nothing
      r2 <- invokeSimulation r $ newRef Nothing
+     r3 <- invokeSimulation r $ newRef HM.empty
      return Transact { transactValue = arrivalValue a,
                        transactArrivalDelay = arrivalDelay a,
                        transactArrivalTime = arrivalTime a,
                        transactPriority = priority,
                        transactPreemptionCountRef = r0,
                        transactProcessIdRef = r1,
-                       transactProcessContRef = r2
+                       transactProcessContRef = r2,
+                       transactQueueEntryRef = r3
                      }
 
 -- | Take the transact.
@@ -197,3 +207,33 @@ transferTransact t transfer =
        runProcess $
        do takeTransact t
           transferProcess transfer
+
+-- | Register the queue entry in the transact.
+registerTransactQueueEntry :: MonadDES m => Transact m a -> QueueEntry m -> Event m ()
+{-# INLINABLE registerTransactQueueEntry #-}
+registerTransactQueueEntry t e =
+  Event $ \p ->
+  do let q = entryQueue e
+     m <- invokeEvent p $ readRef (transactQueueEntryRef t)
+     case HM.lookup q m of
+       Just e0 ->
+         throwComp $
+         SimulationRetry
+         "There is already another queue entry for the specified queue: registerTransactQueueEntry"
+       Nothing ->
+         invokeEvent p $ writeRef (transactQueueEntryRef t) (HM.insert q e m)
+
+-- | Unregister the queue entry from the transact.
+unregisterTransactQueueEntry :: MonadDES m => Transact m a -> Queue m -> Event m (QueueEntry m)
+{-# INLINABLE unregisterTransactQueueEntry #-}
+unregisterTransactQueueEntry t q =
+  Event $ \p ->
+  do m <- invokeEvent p $ readRef (transactQueueEntryRef t)
+     case HM.lookup q m of
+       Nothing ->
+         throwComp $
+         SimulationRetry
+         "There is no queue entry for the specified queue: unregisterTransactQueueEntry"
+       Just e  ->
+         do invokeEvent p $ writeRef (transactQueueEntryRef t) (HM.delete q m)
+            return e

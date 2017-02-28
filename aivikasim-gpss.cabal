@@ -40,6 +40,7 @@ library
                      Simulation.Aivika.Trans.GPSS.Block.Terminate
                      Simulation.Aivika.Trans.GPSS.Block.Transfer
                      Simulation.Aivika.Trans.GPSS.Facility
+                     Simulation.Aivika.Trans.GPSS.Queue
                      Simulation.Aivika.Trans.GPSS.Transact
                      Simulation.Aivika.Trans.GPSS.TransactQueueStrategy
                      
@@ -53,7 +54,8 @@ library
 
     extensions:      MultiParamTypeClasses,
                      TypeFamilies,
-                     FlexibleInstances
+                     FlexibleInstances,
+                     FlexibleContexts
                      
     ghc-options:     -O2
 

@@ -1,0 +1,45 @@
+
+{-# LANGUAGE KindSignatures #-}
+
+-- |
+-- Module     : Simulation.Aivika.Trans.GPSS.Queue
+-- Copyright  : Copyright (c) 2017, David Sorokin <david.sorokin@gmail.com>
+-- License    : AllRightsReserved
+-- Maintainer : David Sorokin <david.sorokin@gmail.com>
+-- Stability  : experimental
+-- Tested with: GHC 8.0.2
+--
+-- This is an hs-boot file.
+--
+module Simulation.Aivika.Trans.GPSS.Queue
+       (Queue,
+        QueueEntry,
+        entryQueue) where
+
+import Data.Hashable
+
+import System.Mem.StableName
+
+import Simulation.Aivika.Trans
+
+data Queue m =
+  Queue { queueStableName :: StableName (Ref m Int),
+          queueCountRef :: Ref m Int,
+          queueCountStatsRef :: Ref m (TimingStats Int),
+          enqueueCountRef :: Ref m Int,
+          enqueueZeroEntryCountRef :: Ref m Int,
+          queueWaitTimeRef :: Ref m (SamplingStats Double),
+          queueNonZeroEntryWaitTimeRef :: Ref m (SamplingStats Double),
+          enqueuedSource :: SignalSource m (),
+          dequeuedSource :: SignalSource m ()
+        }
+
+data QueueEntry m =
+  QueueEntry { entryQueue :: Queue m,
+               entryEnqueueTime :: Double
+             }
+
+instance MonadDES m => Eq (Queue m)
+instance MonadDES m => Hashable (Queue m)
+
+instance MonadDES m => Eq (QueueEntry m)
