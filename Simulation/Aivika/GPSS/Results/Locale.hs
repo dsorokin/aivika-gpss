@@ -105,3 +105,99 @@ queueRateId =
   M.fromList
   [(russianResultLocale, "усредненная скорость (как средняя длина очереди на среднее время ожидания)"),
    (englishResultLocale, "the average queue rate (= queue size / wait time)")]
+
+-- | Property 'facilityCount'.
+facilityCountId :: ResultId
+facilityCountId =
+  LocalisedResultId $
+  M.fromList
+  [(russianResultLocale, "текущее доступное количество прибора"),
+   (englishResultLocale, "the current available count")]
+
+-- | Property 'facilityCountStats'.
+facilityCountStatsId :: ResultId
+facilityCountStatsId =
+  LocalisedResultId $
+  M.fromList
+  [(russianResultLocale, "статистика доступного количества прибора"),
+   (englishResultLocale, "the available count statistics")]
+
+-- | Property 'facilityCaptureCount'.
+facilityCaptureCountId :: ResultId
+facilityCaptureCountId =
+  LocalisedResultId $
+  M.fromList
+  [(russianResultLocale, "текущее количество захвата прибора"),
+   (englishResultLocale, "the current capture count")]
+
+-- | Property 'facilityUtilisationCount'.
+facilityUtilisationCountId :: ResultId
+facilityUtilisationCountId =
+  LocalisedResultId $
+  M.fromList
+  [(russianResultLocale, "текущее используемое количество прибора"),
+   (englishResultLocale, "the current utilisation count")]
+
+-- | Property 'facilityUtilisationCountStats'.
+facilityUtilisationCountStatsId :: ResultId
+facilityUtilisationCountStatsId =
+  LocalisedResultId $
+  M.fromList
+  [(russianResultLocale, "статистка по используемому количеству прибора"),
+   (englishResultLocale, "the utilisation count statistics")]
+
+-- | Property 'facilityQueueCount'.
+facilityQueueCountId :: ResultId
+facilityQueueCountId =
+  LocalisedResultId $
+  M.fromList
+  [(russianResultLocale, "текущая длина очереди к прибору"),
+   (englishResultLocale, "the current queue size")]
+
+-- | Property 'facilityQueueCountStats'.
+facilityQueueCountStatsId :: ResultId
+facilityQueueCountStatsId =
+  LocalisedResultId $
+  M.fromList
+  [(russianResultLocale, "статистика длины очереди к прибору"),
+   (englishResultLocale, "the queue size statistics")]
+
+-- | Property 'facilityTotalWaitTime'.
+facilityTotalWaitTimeId :: ResultId
+facilityTotalWaitTimeId =
+  LocalisedResultId $
+  M.fromList
+  [(russianResultLocale, "общее время ожидания прибора"),
+   (englishResultLocale, "the total wait time")]
+
+-- | Property 'facilityWaitTime'.
+facilityWaitTimeId :: ResultId
+facilityWaitTimeId =
+  LocalisedResultId $
+  M.fromList
+  [(russianResultLocale, "время ожидания прибора"),
+   (englishResultLocale, "the wait time")]
+
+-- | Property 'facilityTotalHoldingTime'.
+facilityTotalHoldingTimeId :: ResultId
+facilityTotalHoldingTimeId =
+  LocalisedResultId $
+  M.fromList
+  [(russianResultLocale, "общее время удержания прибора"),
+   (englishResultLocale, "the total holding time")]
+
+-- | Property 'facilityHoldingTime'.
+facilityHoldingTimeId :: ResultId
+facilityHoldingTimeId =
+  LocalisedResultId $
+  M.fromList
+  [(russianResultLocale, "время удержания прибора"),
+   (englishResultLocale, "the holding time")]
+
+-- | Property 'facilityInterrupted'.
+facilityInterruptedId :: ResultId
+facilityInterruptedId =
+  LocalisedResultId $
+  M.fromList
+  [(russianResultLocale, "удержание прибора сейчас прервано?"),
+   (englishResultLocale, "is the facility interrupted now?")]
