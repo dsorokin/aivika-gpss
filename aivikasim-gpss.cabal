@@ -31,6 +31,7 @@ library
                      Simulation.Aivika.GPSS.Block.Transfer
                      Simulation.Aivika.GPSS.Facility
                      Simulation.Aivika.GPSS.Queue
+                     Simulation.Aivika.GPSS.Results.Locale
                      Simulation.Aivika.GPSS.Transact
                      Simulation.Aivika.GPSS.TransactQueueStrategy
                      Simulation.Aivika.Trans.GPSS
