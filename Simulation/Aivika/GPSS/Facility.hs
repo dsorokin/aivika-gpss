@@ -293,7 +293,7 @@ facilityTotalHoldingTime r =
 -- | Return the statistics for the holding time of the facility.
 facilityHoldingTime :: Facility a -> Event (SamplingStats Double)
 facilityHoldingTime r =
-  Event $ \p -> readIORef (facilityWaitTimeRef r)
+  Event $ \p -> readIORef (facilityHoldingTimeRef r)
 
 -- | Signal triggered when the 'facilityTotalHoldingTime' and 'facilityHoldingTime' properties change.
 facilityHoldingTimeChanged :: Facility a -> Signal (SamplingStats Double)

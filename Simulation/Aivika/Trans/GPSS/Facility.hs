@@ -315,7 +315,7 @@ facilityTotalHoldingTime r =
 facilityHoldingTime :: MonadDES m => Facility m a -> Event m (SamplingStats Double)
 {-# INLINABLE facilityHoldingTime #-}
 facilityHoldingTime r =
-  Event $ \p -> invokeEvent p $ readRef (facilityWaitTimeRef r)
+  Event $ \p -> invokeEvent p $ readRef (facilityHoldingTimeRef r)
 
 -- | Signal triggered when the 'facilityTotalHoldingTime' and 'facilityHoldingTime' properties change.
 facilityHoldingTimeChanged :: MonadDES m => Facility m a -> Signal m (SamplingStats Double)
