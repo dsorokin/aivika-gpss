@@ -14,6 +14,7 @@ module Simulation.Aivika.Trans.GPSS
         module Simulation.Aivika.Trans.GPSS.Block,
         module Simulation.Aivika.Trans.GPSS.Block.Advance,
         module Simulation.Aivika.Trans.GPSS.Block.Generate,
+        module Simulation.Aivika.Trans.GPSS.Block.Queue,
         module Simulation.Aivika.Trans.GPSS.Block.Terminate,
         module Simulation.Aivika.Trans.GPSS.Block.Transfer,
         module Simulation.Aivika.Trans.GPSS.Facility,
@@ -24,6 +25,7 @@ module Simulation.Aivika.Trans.GPSS
 import Simulation.Aivika.Trans.GPSS.Block
 import Simulation.Aivika.Trans.GPSS.Block.Advance
 import Simulation.Aivika.Trans.GPSS.Block.Generate
+import Simulation.Aivika.Trans.GPSS.Block.Queue
 import Simulation.Aivika.Trans.GPSS.Block.Terminate
 import Simulation.Aivika.Trans.GPSS.Block.Transfer
 import Simulation.Aivika.Trans.GPSS.Facility
