@@ -19,7 +19,7 @@ import qualified Simulation.Aivika.Trans.GPSS.Queue as Q
 
 -- | This is the GPSS construct
 --
--- @QUEUE WaitingLine@
+-- @QUEUE A,B@
 queueBlock :: MonadDES m
               => Q.Queue m
               -- ^ the queue
