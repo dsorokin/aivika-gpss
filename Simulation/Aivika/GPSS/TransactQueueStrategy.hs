@@ -87,6 +87,8 @@ instance PriorityQueueStrategy TransactQueueStrategy Int where
          Nothing ->
            do xs <- DLL.newList
               DLL.listAddLast xs i
+              modifyIORef (transactStrategyQueue q) $
+                M.insert p xs
          Just xs ->
            DLL.listAddLast xs i
 
@@ -104,7 +106,13 @@ transactStrategyQueueDeleteBy q priority pred =
      let xs = M.lookup priority m
      case xs of
        Nothing -> return Nothing
-       Just xs -> DLL.listRemoveBy xs pred
+       Just xs ->
+         do a <- DLL.listRemoveBy xs pred
+            empty <- DLL.listNull xs
+            when empty $
+              modifyIORef (transactStrategyQueue q) $
+              M.delete priority
+            return a
 
 -- | Test whether the queue contains a transact with the specified priority satisfying the provided predicate.
 transactStrategyQueueContainsBy :: StrategyQueue TransactQueueStrategy a
