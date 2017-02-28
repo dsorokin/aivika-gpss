@@ -21,13 +21,16 @@ module Simulation.Aivika.GPSS.Transact
         transactPreemptionBegin,
         transactPreemptionEnd,
         requireTransactProcessId,
-        transferTransact) where
+        transferTransact,
+        registerTransactQueueEntry,
+        unregisterTransactQueueEntry) where
 
 import Control.Monad
 import Control.Monad.Trans
 import Control.Exception
 
 import Data.IORef
+import qualified Data.HashMap.Lazy as HM
 
 import Simulation.Aivika
 import Simulation.Aivika.Internal.Specs
@@ -35,6 +38,8 @@ import Simulation.Aivika.Internal.Simulation
 import Simulation.Aivika.Internal.Event
 import Simulation.Aivika.Internal.Cont
 import Simulation.Aivika.Internal.Process
+
+import {-# SOURCE #-} Simulation.Aivika.GPSS.Queue
 
 -- | Represents a GPSS transact.
 data Transact a =
@@ -50,8 +55,10 @@ data Transact a =
              -- ^ How many times the transact is preempted.
              transactProcessIdRef :: IORef (Maybe ProcessId),
              -- ^ An identifier of the process that handles the transact at present
-             transactProcessContRef :: IORef (Maybe (FrozenCont ()))
+             transactProcessContRef :: IORef (Maybe (FrozenCont ())),
              -- ^ A continuation of the process that tried to handle the transact.
+             transactQueueEntryRef :: IORef (HM.HashMap Queue QueueEntry)
+             -- ^ The queue entries registered by the the transact.
            }
 
 instance Eq (Transact a) where
@@ -68,13 +75,15 @@ newTransact a priority =
   do r0 <- newIORef 0
      r1 <- newIORef Nothing
      r2 <- newIORef Nothing
+     r3 <- newIORef HM.empty
      return Transact { transactValue = arrivalValue a,
                        transactArrivalDelay = arrivalDelay a,
                        transactArrivalTime = arrivalTime a,
                        transactPriority = priority,
                        transactPreemptionCountRef = r0,
                        transactProcessIdRef = r1,
-                       transactProcessContRef = r2
+                       transactProcessContRef = r2,
+                       transactQueueEntryRef = r3
                      }
 
 -- | Take the transact.
@@ -188,3 +197,31 @@ transferTransact t transfer =
        runProcess $
        do takeTransact t
           transferProcess transfer
+
+-- | Register the queue entry in the transact.
+registerTransactQueueEntry :: Transact a -> QueueEntry -> Event ()
+registerTransactQueueEntry t e =
+  Event $ \p ->
+  do let q = entryQueue e
+     m <- readIORef (transactQueueEntryRef t)
+     case HM.lookup q m of
+       Just e0 ->
+         throwIO $
+         SimulationRetry
+         "There is already another queue entry for the specified queue: registerTransactQueueEntry"
+       Nothing ->
+         writeIORef (transactQueueEntryRef t) (HM.insert q e m)
+
+-- | Unregister the queue entry from the transact.
+unregisterTransactQueueEntry :: Transact a -> Queue -> Event QueueEntry
+unregisterTransactQueueEntry t q =
+  Event $ \p ->
+  do m <- readIORef (transactQueueEntryRef t)
+     case HM.lookup q m of
+       Nothing ->
+         throwIO $
+         SimulationRetry
+         "There is no queue entry for the specified queue: unregisterTransactQueueEntry"
+       Just e  ->
+         do writeIORef (transactQueueEntryRef t) (HM.delete q m)
+            return e

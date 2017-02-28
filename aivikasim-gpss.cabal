@@ -30,6 +30,7 @@ library
                      Simulation.Aivika.GPSS.Block.Terminate
                      Simulation.Aivika.GPSS.Block.Transfer
                      Simulation.Aivika.GPSS.Facility
+                     Simulation.Aivika.GPSS.Queue
                      Simulation.Aivika.GPSS.Transact
                      Simulation.Aivika.GPSS.TransactQueueStrategy
                      Simulation.Aivika.Trans.GPSS
@@ -45,6 +46,8 @@ library
     build-depends:   base >= 4.2 && < 6,
                      mtl >= 1.1.0.2,
                      containers >= 0.4.0.0,
+                     hashable >= 1.2.0.0,
+                     unordered-containers >= 0.1.0.0,
                      aivikasim >= 1.0,
                      aivikasim-transformers >= 1.0
 
