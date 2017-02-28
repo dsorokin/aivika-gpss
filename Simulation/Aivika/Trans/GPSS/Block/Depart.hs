@@ -26,5 +26,6 @@ departBlock :: MonadDES m
                -> Int
                -- ^ the content decrement
                -> Block m (Transact m a) (Transact m a)
+{-# INLINABLE departBlock #-}
 departBlock q decrement =
   Block { blockProcess = \a -> (liftEvent $ Q.dequeue q a decrement) >> return a }
