@@ -22,7 +22,4 @@ advanceBlock :: Process ()
                 -- ^ the delay
                 -> Block a a
 advanceBlock p =
-  Block { blockProcess = \a -> p >> return a,
-          blockHeadQueueCount = return 0,
-          blockCanEnter = return True
-        }
+  Block { blockProcess = \a -> p >> return a }

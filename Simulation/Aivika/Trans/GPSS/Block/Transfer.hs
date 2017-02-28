@@ -24,7 +24,4 @@ transferBlock :: MonadDES m
                  -> Block m a b
 {-# INLINABLE transferBlock #-}
 transferBlock x =
-  Block { blockProcess = \a -> transferProcess (blockProcess x a),
-          blockHeadQueueCount = blockHeadQueueCount x,
-          blockCanEnter = blockCanEnter x
-        }
+  Block { blockProcess = \a -> transferProcess (blockProcess x a) }

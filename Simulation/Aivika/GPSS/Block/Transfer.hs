@@ -22,7 +22,4 @@ transferBlock :: Block a ()
                  -- ^ a new place
                  -> Block a b
 transferBlock x =
-  Block { blockProcess = \a -> transferProcess (blockProcess x a),
-          blockHeadQueueCount = blockHeadQueueCount x,
-          blockCanEnter = blockCanEnter x
-        }
+  Block { blockProcess = \a -> transferProcess (blockProcess x a) }

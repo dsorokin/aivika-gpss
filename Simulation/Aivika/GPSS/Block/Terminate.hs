@@ -25,10 +25,7 @@ import Simulation.Aivika.GPSS.Block
 -- @TERMINATE@
 terminateBlock :: Block a ()
 terminateBlock =
-  Block { blockProcess = \a -> return (),
-          blockHeadQueueCount = return 0,
-          blockCanEnter = return True
-        }
+  Block { blockProcess = \a -> return () }
 
 -- | This is the GPSS construct
 --
@@ -39,10 +36,7 @@ terminateBlockByCountM :: Ref Int
                           -- ^ the computation of decrement
                           -> Block a ()
 terminateBlockByCountM counter decrement =
-  Block { blockProcess = \a -> action,
-          blockHeadQueueCount = return 0,
-          blockCanEnter = return True
-        }
+  Block { blockProcess = \a -> action }
     where
       action = 
         liftEvent $
@@ -63,10 +57,7 @@ terminateBlockByCount :: Ref Int
                          -- ^ the decrement
                          -> Block a ()
 terminateBlockByCount counter i =
-  Block { blockProcess = \a -> action,
-          blockHeadQueueCount = return 0,
-          blockCanEnter = return True
-        }
+  Block { blockProcess = \a -> action }
     where
       action = 
         liftEvent $

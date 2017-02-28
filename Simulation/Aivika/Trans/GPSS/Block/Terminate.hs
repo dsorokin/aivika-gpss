@@ -26,10 +26,7 @@ import Simulation.Aivika.Trans.GPSS.Block
 terminateBlock :: MonadDES m => Block m a ()
 {-# INLINABLE terminateBlock #-}
 terminateBlock =
-  Block { blockProcess = \a -> return (),
-          blockHeadQueueCount = return 0,
-          blockCanEnter = return True
-        }
+  Block { blockProcess = \a -> return () }
 
 -- | This is the GPSS construct
 --
@@ -42,10 +39,7 @@ terminateBlockByCountM :: MonadDES m
                           -> Block m a ()
 {-# INLINABLE terminateBlockByCountM #-}
 terminateBlockByCountM counter decrement =
-  Block { blockProcess = \a -> action,
-          blockHeadQueueCount = return 0,
-          blockCanEnter = return True
-        }
+  Block { blockProcess = \a -> action }
     where
       action = 
         liftEvent $
@@ -68,10 +62,7 @@ terminateBlockByCount :: MonadDES m
                          -> Block m a ()
 {-# INLINABLE terminateBlockByCount #-}
 terminateBlockByCount counter i =
-  Block { blockProcess = \a -> action,
-          blockHeadQueueCount = return 0,
-          blockCanEnter = return True
-        }
+  Block { blockProcess = \a -> action }
     where
       action = 
         liftEvent $

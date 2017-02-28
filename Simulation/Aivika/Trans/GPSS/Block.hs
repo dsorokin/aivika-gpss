@@ -21,30 +21,20 @@ import Simulation.Aivika.Trans
 
 -- | Represents a GPSS block.
 data Block m a b =
-  Block { blockProcess :: a -> Process m b,
+  Block { blockProcess :: a -> Process m b
           -- ^ Process the item.
-          blockHeadQueueCount :: Event m Int,
-          -- ^ Return the block head queue size.
-          blockCanEnter :: Event m Bool
-          -- ^ Whether an item can enter the block.
         }
 
 -- | Represents a GPSS generator block.
 newtype GeneratorBlock m a =
-  GeneratorBlock { runGeneratorBlock :: Block m a () -> Process m () }
+  GeneratorBlock { runGeneratorBlock :: Block m a () -> Process m ()
+                   -- ^ Run the generator block.
+                 }
 
 instance MonadDES m => C.Category (Block m) where
 
   {-# INLINABLE id #-}
-  id =
-    Block { blockProcess = return,
-            blockHeadQueueCount = return 0,
-            blockCanEnter = return True
-          }
+  id = Block { blockProcess = return }
 
   {-# INLINABLE (.) #-}
-  x . y =
-    Block { blockProcess = \a -> do { b <- blockProcess y a; blockProcess x b },
-            blockHeadQueueCount = blockHeadQueueCount y,
-            blockCanEnter = blockCanEnter y
-          }
+  x . y = Block { blockProcess = \a -> do { b <- blockProcess y a; blockProcess x b } }

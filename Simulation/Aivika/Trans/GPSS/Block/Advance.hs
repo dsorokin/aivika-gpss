@@ -24,7 +24,4 @@ advanceBlock :: MonadDES m
                 -> Block m a a
 {-# INLINABLE advanceBlock #-}
 advanceBlock p =
-  Block { blockProcess = \a -> p >> return a,
-          blockHeadQueueCount = return 0,
-          blockCanEnter = return True
-        }
+  Block { blockProcess = \a -> p >> return a }
