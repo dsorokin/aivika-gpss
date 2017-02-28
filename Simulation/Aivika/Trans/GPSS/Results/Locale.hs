@@ -34,21 +34,21 @@ queueNullId =
   [(russianResultLocale, "очередь пуста?"),
    (englishResultLocale, "is the queue empty?")]
 
--- | Property 'Q.queueCount'.
-queueCountId :: ResultId
-queueCountId =
+-- | Property 'Q.queueContent'.
+queueContentId :: ResultId
+queueContentId =
   LocalisedResultId $
   M.fromList
-  [(russianResultLocale, "текущий размер очереди"),
-   (englishResultLocale, "the current queue size")]
+  [(russianResultLocale, "текущее содержимое очереди"),
+   (englishResultLocale, "the current queue content")]
 
--- | Property 'Q.queueCountStats'.
-queueCountStatsId :: ResultId
-queueCountStatsId =
+-- | Property 'Q.queueContentStats'.
+queueContentStatsId :: ResultId
+queueContentStatsId =
   LocalisedResultId $
   M.fromList
-  [(russianResultLocale, "статистика по размеру очереди"),
-   (englishResultLocale, "the queue size statistics")]
+  [(russianResultLocale, "статистика по содержимому очереди"),
+   (englishResultLocale, "the queue content statistics")]
 
 -- | Property 'Q.enqueueCount'.
 enqueueCountId :: ResultId
@@ -65,30 +65,6 @@ enqueueZeroEntryCountId =
   M.fromList
   [(russianResultLocale, "количество добавленных транзактов без фактического ожидания"),
    (englishResultLocale, "the number of zero entry enqueued transacts")]
-
--- | Property 'Q.dequeueCount'.
-dequeueCountId :: ResultId
-dequeueCountId =
-  LocalisedResultId $
-  M.fromList
-  [(russianResultLocale, "количество извлеченных транзактов"),
-   (englishResultLocale, "the number of dequeued transacts")]
-
--- | Property 'Q.enqueueRate'.
-enqueueRateId :: ResultId
-enqueueRateId =
-  LocalisedResultId $
-  M.fromList
-  [(russianResultLocale, "количество добавлений на ед. времени"),
-   (englishResultLocale, "how many enqueued transacts per time?")]
-
--- | Property 'Q.dequeueRate'.
-dequeueRateId :: ResultId
-dequeueRateId =
-  LocalisedResultId $
-  M.fromList
-  [(russianResultLocale, "количество извлечений на ед. времени"),
-   (englishResultLocale, "how many dequeued transacts per time?")]
 
 -- | Property 'Q.queueWaitTime'.
 queueWaitTimeId :: ResultId

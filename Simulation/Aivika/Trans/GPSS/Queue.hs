@@ -19,13 +19,10 @@ module Simulation.Aivika.Trans.GPSS.Queue
         newQueue,
         -- * Queue Properties and Activities
         queueNull,
-        queueCount,
-        queueCountStats,
+        queueContent,
+        queueContentStats,
         enqueueCount,
         enqueueZeroEntryCount,
-        dequeueCount,
-        enqueueRate,
-        dequeueRate,
         queueWaitTime,
         queueNonZeroEntryWaitTime,
         queueRate,
@@ -35,14 +32,12 @@ module Simulation.Aivika.Trans.GPSS.Queue
         -- * Derived Signals for Properties
         queueNullChanged,
         queueNullChanged_,
-        queueCountChanged,
-        queueCountChanged_,
+        queueContentChanged,
+        queueContentChanged_,
         enqueueCountChanged,
         enqueueCountChanged_,
         enqueueZeroEntryCountChanged,
         enqueueZeroEntryCountChanged_,
-        dequeueCountChanged,
-        dequeueCountChanged_,
         queueWaitTimeChanged,
         queueWaitTimeChanged_,
         queueNonZeroEntryWaitTimeChanged,
@@ -78,8 +73,8 @@ import Simulation.Aivika.Trans.GPSS.Transact
 -- | Represents the queue entity.
 data Queue m =
   Queue { queueStableName :: StableName (Ref m Int),
-          queueCountRef :: Ref m Int,
-          queueCountStatsRef :: Ref m (TimingStats Int),
+          queueContentRef :: Ref m Int,
+          queueContentStatsRef :: Ref m (TimingStats Int),
           enqueueCountRef :: Ref m Int,
           enqueueZeroEntryCountRef :: Ref m Int,
           queueWaitTimeRef :: Ref m (SamplingStats Double),
@@ -97,7 +92,7 @@ data QueueEntry m =
              } deriving Eq
 
 instance MonadDES m => Eq (Queue m) where
-  x == y = (queueCountRef x) == (queueCountRef y)
+  x == y = (queueContentRef x) == (queueContentRef y)
 
 instance MonadDES m => Hashable (Queue m) where
   hashWithSalt salt x = hashWithSalt salt (queueStableName x)
@@ -117,8 +112,8 @@ newQueue =
      s2 <- liftSimulation $ newSignalSource
      sn <- liftIO $ makeStableName i
      return Queue { queueStableName = sn,
-                    queueCountRef = i,
-                    queueCountStatsRef = is,
+                    queueContentRef = i,
+                    queueContentStatsRef = is,
                     enqueueCountRef = e,
                     enqueueZeroEntryCountRef = z,
                     queueWaitTimeRef = w,
@@ -133,7 +128,7 @@ queueNull :: MonadDES m => Queue m -> Event m Bool
 {-# INLINABLE queueNull #-}
 queueNull q =
   Event $ \p ->
-  do n <- invokeEvent p $ readRef (queueCountRef q)
+  do n <- invokeEvent p $ readRef (queueContentRef q)
      return (n == 0)
   
 -- | Signal when the 'queueNull' property value has changed.
@@ -145,32 +140,32 @@ queueNullChanged q =
 -- | Signal when the 'queueNull' property value has changed.
 queueNullChanged_ :: MonadDES m => Queue m -> Signal m ()
 {-# INLINABLE queueNullChanged_ #-}
-queueNullChanged_ = queueCountChanged_
+queueNullChanged_ = queueContentChanged_
 
--- | Return the current queue size.
+-- | Return the current queue content.
 --
--- See also 'queueCountStats', 'queueCountChanged' and 'queueCountChanged_'.
-queueCount :: MonadDES m => Queue m -> Event m Int
-{-# INLINABLE queueCount #-}
-queueCount q =
-  Event $ \p -> invokeEvent p $ readRef (queueCountRef q)
+-- See also 'queueContentStats', 'queueContentChanged' and 'queueContentChanged_'.
+queueContent :: MonadDES m => Queue m -> Event m Int
+{-# INLINABLE queueContent #-}
+queueContent q =
+  Event $ \p -> invokeEvent p $ readRef (queueContentRef q)
 
--- | Return the queue size statistics.
-queueCountStats :: MonadDES m => Queue m -> Event m (TimingStats Int)
-{-# INLINABLE queueCountStats #-}
-queueCountStats q =
-  Event $ \p -> invokeEvent p $ readRef (queueCountStatsRef q)
+-- | Return the queue content statistics.
+queueContentStats :: MonadDES m => Queue m -> Event m (TimingStats Int)
+{-# INLINABLE queueContentStats #-}
+queueContentStats q =
+  Event $ \p -> invokeEvent p $ readRef (queueContentStatsRef q)
   
--- | Signal when the 'queueCount' property value has changed.
-queueCountChanged :: MonadDES m => Queue m -> Signal m Int
-{-# INLINABLE queueCountChanged #-}
-queueCountChanged q =
-  mapSignalM (const $ queueCount q) (queueCountChanged_ q)
+-- | Signal when the 'queueContent' property value has changed.
+queueContentChanged :: MonadDES m => Queue m -> Signal m Int
+{-# INLINABLE queueContentChanged #-}
+queueContentChanged q =
+  mapSignalM (const $ queueContent q) (queueContentChanged_ q)
   
--- | Signal when the 'queueCount' property value has changed.
-queueCountChanged_ :: MonadDES m => Queue m -> Signal m ()
-{-# INLINABLE queueCountChanged_ #-}
-queueCountChanged_ q =
+-- | Signal when the 'queueContent' property value has changed.
+queueContentChanged_ :: MonadDES m => Queue m -> Signal m ()
+{-# INLINABLE queueContentChanged_ #-}
+queueContentChanged_ q =
   mapSignal (const ()) (enqueued q) <>
   mapSignal (const ()) (dequeued q)
 
@@ -214,53 +209,6 @@ enqueueZeroEntryCountChanged_ :: MonadDES m => Queue m -> Signal m ()
 enqueueZeroEntryCountChanged_ q =
   mapSignal (const ()) (dequeued q)
 
--- | Return the total number of input items that were dequeued.
---
--- See also 'dequeueCountChanged' and 'dequeueCountChanged_'.
-dequeueCount :: MonadDES m => Queue m -> Event m Int
-{-# INLINABLE dequeueCount #-}
-dequeueCount q =
-  Event $ \p ->
-  do n1 <- invokeEvent p $ readRef (enqueueCountRef q)
-     n2 <- invokeEvent p $ readRef (queueCountRef q)
-     return (n1 - n2)
-  
--- | Signal when the 'dequeueCount' property value has changed.
-dequeueCountChanged :: MonadDES m => Queue m -> Signal m Int
-{-# INLINABLE dequeueCountChanged #-}
-dequeueCountChanged q =
-  mapSignalM (const $ dequeueCount q) (dequeueCountChanged_ q)
-  
--- | Signal when the 'dequeueCount' property value has changed.
-dequeueCountChanged_ :: MonadDES m => Queue m -> Signal m ()
-{-# INLINABLE dequeueCountChanged_ #-}
-dequeueCountChanged_ q =
-  mapSignal (const ()) (dequeued q)
-
--- | Return the rate of the input items that were enqueued: how many items
--- per time.
-enqueueRate :: MonadDES m => Queue m -> Event m Double
-{-# INLINABLE enqueueRate #-}
-enqueueRate q =
-  Event $ \p ->
-  do x <- invokeEvent p $ readRef (enqueueCountRef q)
-     let t0 = spcStartTime $ pointSpecs p
-         t  = pointTime p
-     return (fromIntegral x / (t - t0))
-      
--- | Return the rate of the requests for dequeueing the items: how many requests
--- per time.
-dequeueRate :: MonadDES m => Queue m -> Event m Double
-{-# INLINABLE dequeueRate #-}
-dequeueRate q =
-  Event $ \p ->
-  do n1 <- invokeEvent p $ readRef (enqueueCountRef q)
-     n2 <- invokeEvent p $ readRef (queueCountRef q)
-     let x  = n1 - n2
-         t0 = spcStartTime $ pointSpecs p
-         t  = pointTime p
-     return (fromIntegral x / (t - t0))
-      
 -- | Return the wait (or residence) time.
 --
 -- See also 'queueWaitTimeChanged' and 'queueWaitTimeChanged_'.
@@ -309,7 +257,7 @@ queueRate :: MonadDES m => Queue m -> Event m Double
 {-# INLINABLE queueRate #-}
 queueRate q =
   Event $ \p ->
-  do x <- invokeEvent p $ readRef (queueCountStatsRef q)
+  do x <- invokeEvent p $ readRef (queueContentStatsRef q)
      y <- invokeEvent p $ readRef (queueWaitTimeRef q)
      return (timingStatsMean x / samplingStatsMean y) 
       
@@ -342,9 +290,11 @@ enqueue :: MonadDES m
            -- ^ the queue
            -> Transact m a
            -- ^ the item to be enqueued
+           -> Int
+           -- ^ the content increment
            -> Event m ()
 {-# INLINABLE enqueue #-}
-enqueue q transact =
+enqueue q transact increment =
   Event $ \p ->
   do let t = pointTime p
          e = QueueEntry { entryQueue = q,
@@ -353,12 +303,12 @@ enqueue q transact =
      let n' = n + 1
      invokeEvent p $
        writeRef (enqueueCountRef q) n'
-     c <- invokeEvent p $ readRef (queueCountRef q)
-     let c' = c + 1
+     c <- invokeEvent p $ readRef (queueContentRef q)
+     let c' = c + increment
      invokeEvent p $
-       writeRef (queueCountRef q) c'
+       writeRef (queueContentRef q) c'
      invokeEvent p $
-       modifyRef (queueCountStatsRef q) (addTimingStats t c')
+       modifyRef (queueContentStatsRef q) (addTimingStats t c')
      invokeEvent p $
        registerTransactQueueEntry transact e
      invokeEvent p $
@@ -370,21 +320,23 @@ dequeue :: MonadDES m
            -- ^ the queue
            -> Transact m a
            -- ^ the item to be dequeued
+           -> Int
+           -- ^ the content decrement
            -> Event m ()
 {-# INLINABLE dequeue #-}
-dequeue q transact =
+dequeue q transact decrement =
   Event $ \p ->
   do e <- invokeEvent p $
           unregisterTransactQueueEntry transact q
      let t  = pointTime p
          t0 = entryEnqueueTime e
          dt = t - t0
-     c <- invokeEvent p $ readRef (queueCountRef q)
-     let c' = c - 1
+     c <- invokeEvent p $ readRef (queueContentRef q)
+     let c' = c - decrement
      invokeEvent p $
-       writeRef (queueCountRef q) c'
+       writeRef (queueContentRef q) c'
      invokeEvent p $
-       modifyRef (queueCountStatsRef q) (addTimingStats t c')
+       modifyRef (queueContentStatsRef q) (addTimingStats t c')
      invokeEvent p $
        modifyRef (queueWaitTimeRef q) $
        addSamplingStats dt

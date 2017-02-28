@@ -19,9 +19,11 @@ import qualified Simulation.Aivika.GPSS.Queue as Q
 
 -- | This is the GPSS construct
 --
--- @QUEUE WaitingLine@
+-- @QUEUE A,B@
 queueBlock :: Q.Queue
               -- ^ the queue
+              -> Int
+              -- ^ the content increment
               -> Block (Transact a) (Transact a)
-queueBlock q =
-  Block { blockProcess = \a -> (liftEvent $ Q.enqueue q a) >> return a }
+queueBlock q increment =
+  Block { blockProcess = \a -> (liftEvent $ Q.enqueue q a increment) >> return a }

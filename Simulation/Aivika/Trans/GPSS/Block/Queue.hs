@@ -23,7 +23,9 @@ import qualified Simulation.Aivika.Trans.GPSS.Queue as Q
 queueBlock :: MonadDES m
               => Q.Queue m
               -- ^ the queue
+              -> Int
+              -- ^ the content increment
               -> Block m (Transact m a) (Transact m a)
 {-# INLINABLE queueBlock #-}
-queueBlock q =
-  Block { blockProcess = \a -> (liftEvent $ Q.enqueue q a) >> return a }
+queueBlock q increment =
+  Block { blockProcess = \a -> (liftEvent $ Q.enqueue q a increment) >> return a }

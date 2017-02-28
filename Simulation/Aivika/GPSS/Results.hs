@@ -34,13 +34,10 @@ queueResultSource c =
     resultObjectSummary = queueResultSummary c,
     resultObjectProperties = [
       resultContainerProperty c "queueNull" queueNullId Q.queueNull Q.queueNullChanged_,
-      resultContainerProperty c "queueCount" queueCountId Q.queueCount Q.queueCountChanged_,
-      resultContainerProperty c "queueCountStats" queueCountStatsId Q.queueCountStats Q.queueCountChanged_,
+      resultContainerProperty c "queueContent" queueContentId Q.queueContent Q.queueContentChanged_,
+      resultContainerProperty c "queueContentStats" queueContentStatsId Q.queueContentStats Q.queueContentChanged_,
       resultContainerProperty c "enqueueCount" enqueueCountId Q.enqueueCount Q.enqueueCountChanged_,
       resultContainerProperty c "enqueueZeroEntryCount" enqueueZeroEntryCountId Q.enqueueZeroEntryCount Q.enqueueZeroEntryCountChanged_,
-      resultContainerProperty c "dequeueCount" dequeueCountId Q.dequeueCount Q.dequeueCountChanged_,
-      resultContainerIntegProperty c "enqueueRate" enqueueRateId Q.enqueueRate,
-      resultContainerIntegProperty c "dequeueRate" dequeueRateId Q.dequeueRate,
       resultContainerProperty c "queueWaitTime" queueWaitTimeId Q.queueWaitTime Q.queueWaitTimeChanged_,
       resultContainerProperty c "queueNonZeroEntryWaitTime" queueNonZeroEntryWaitTimeId Q.queueNonZeroEntryWaitTime Q.queueNonZeroEntryWaitTimeChanged_,
       resultContainerProperty c "queueRate" queueRateId Q.queueRate Q.queueRateChanged_ ] }
@@ -58,10 +55,9 @@ queueResultSummary c =
     resultObjectSignal = resultContainerSignal c,
     resultObjectSummary = queueResultSummary c,
     resultObjectProperties = [
-      resultContainerProperty c "queueCountStats" queueCountStatsId Q.queueCountStats Q.queueCountChanged_,
+      resultContainerProperty c "queueContentStats" queueContentStatsId Q.queueContentStats Q.queueContentChanged_,
       resultContainerProperty c "enqueueCount" enqueueCountId Q.enqueueCount Q.enqueueCountChanged_,
       resultContainerProperty c "enqueueZeroEntryCount" enqueueZeroEntryCountId Q.enqueueZeroEntryCount Q.enqueueZeroEntryCountChanged_,
-      resultContainerProperty c "dequeueCount" dequeueCountId Q.dequeueCount Q.dequeueCountChanged_,
       resultContainerProperty c "queueWaitTime" queueWaitTimeId Q.queueWaitTime Q.queueWaitTimeChanged_,
       resultContainerProperty c "queueNonZeroEntryWaitTime" queueNonZeroEntryWaitTimeId Q.queueNonZeroEntryWaitTime Q.queueNonZeroEntryWaitTimeChanged_,
       resultContainerProperty c "queueRate" queueRateId Q.queueRate Q.queueRateChanged_ ] }

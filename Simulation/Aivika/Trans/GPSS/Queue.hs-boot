@@ -24,8 +24,8 @@ import Simulation.Aivika.Trans
 
 data Queue m =
   Queue { queueStableName :: StableName (Ref m Int),
-          queueCountRef :: Ref m Int,
-          queueCountStatsRef :: Ref m (TimingStats Int),
+          queueContentRef :: Ref m Int,
+          queueContentStatsRef :: Ref m (TimingStats Int),
           enqueueCountRef :: Ref m Int,
           enqueueZeroEntryCountRef :: Ref m Int,
           queueWaitTimeRef :: Ref m (SamplingStats Double),

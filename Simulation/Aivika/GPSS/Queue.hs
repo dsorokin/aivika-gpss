@@ -17,13 +17,10 @@ module Simulation.Aivika.GPSS.Queue
         newQueue,
         -- * Queue Properties and Activities
         queueNull,
-        queueCount,
-        queueCountStats,
+        queueContent,
+        queueContentStats,
         enqueueCount,
         enqueueZeroEntryCount,
-        dequeueCount,
-        enqueueRate,
-        dequeueRate,
         queueWaitTime,
         queueNonZeroEntryWaitTime,
         queueRate,
@@ -33,14 +30,12 @@ module Simulation.Aivika.GPSS.Queue
         -- * Derived Signals for Properties
         queueNullChanged,
         queueNullChanged_,
-        queueCountChanged,
-        queueCountChanged_,
+        queueContentChanged,
+        queueContentChanged_,
         enqueueCountChanged,
         enqueueCountChanged_,
         enqueueZeroEntryCountChanged,
         enqueueZeroEntryCountChanged_,
-        dequeueCountChanged,
-        dequeueCountChanged_,
         queueWaitTimeChanged,
         queueWaitTimeChanged_,
         queueNonZeroEntryWaitTimeChanged,
@@ -76,8 +71,8 @@ import Simulation.Aivika.GPSS.Transact
 -- | Represents the queue entity.
 data Queue =
   Queue { queueStableName :: StableName (IORef Int),
-          queueCountRef :: IORef Int,
-          queueCountStatsRef :: IORef (TimingStats Int),
+          queueContentRef :: IORef Int,
+          queueContentStatsRef :: IORef (TimingStats Int),
           enqueueCountRef :: IORef Int,
           enqueueZeroEntryCountRef :: IORef Int,
           queueWaitTimeRef :: IORef (SamplingStats Double),
@@ -95,7 +90,7 @@ data QueueEntry =
              } deriving Eq
 
 instance Eq Queue where
-  x == y = (queueCountRef x) == (queueCountRef y)
+  x == y = (queueContentRef x) == (queueContentRef y)
 
 instance Hashable Queue where
   hashWithSalt salt x = hashWithSalt salt (queueStableName x)
@@ -114,8 +109,8 @@ newQueue =
      s2 <- liftSimulation $ newSignalSource
      sn <- liftIO $ makeStableName i
      return Queue { queueStableName = sn,
-                    queueCountRef = i,
-                    queueCountStatsRef = is,
+                    queueContentRef = i,
+                    queueContentStatsRef = is,
                     enqueueCountRef = e,
                     enqueueZeroEntryCountRef = z,
                     queueWaitTimeRef = w,
@@ -129,7 +124,7 @@ newQueue =
 queueNull :: Queue -> Event Bool
 queueNull q =
   Event $ \p ->
-  do n <- readIORef (queueCountRef q)
+  do n <- readIORef (queueContentRef q)
      return (n == 0)
   
 -- | Signal when the 'queueNull' property value has changed.
@@ -139,28 +134,28 @@ queueNullChanged q =
   
 -- | Signal when the 'queueNull' property value has changed.
 queueNullChanged_ :: Queue -> Signal ()
-queueNullChanged_ = queueCountChanged_
+queueNullChanged_ = queueContentChanged_
 
--- | Return the current queue size.
+-- | Return the current queue content.
 --
--- See also 'queueCountStats', 'queueCountChanged' and 'queueCountChanged_'.
-queueCount :: Queue -> Event Int
-queueCount q =
-  Event $ \p -> readIORef (queueCountRef q)
+-- See also 'queueContentStats', 'queueContentChanged' and 'queueContentChanged_'.
+queueContent :: Queue -> Event Int
+queueContent q =
+  Event $ \p -> readIORef (queueContentRef q)
 
--- | Return the queue size statistics.
-queueCountStats :: Queue -> Event (TimingStats Int)
-queueCountStats q =
-  Event $ \p -> readIORef (queueCountStatsRef q)
+-- | Return the queue content statistics.
+queueContentStats :: Queue -> Event (TimingStats Int)
+queueContentStats q =
+  Event $ \p -> readIORef (queueContentStatsRef q)
   
--- | Signal when the 'queueCount' property value has changed.
-queueCountChanged :: Queue -> Signal Int
-queueCountChanged q =
-  mapSignalM (const $ queueCount q) (queueCountChanged_ q)
+-- | Signal when the 'queueContent' property value has changed.
+queueContentChanged :: Queue -> Signal Int
+queueContentChanged q =
+  mapSignalM (const $ queueContent q) (queueContentChanged_ q)
   
--- | Signal when the 'queueCount' property value has changed.
-queueCountChanged_ :: Queue -> Signal ()
-queueCountChanged_ q =
+-- | Signal when the 'queueContent' property value has changed.
+queueContentChanged_ :: Queue -> Signal ()
+queueContentChanged_ q =
   mapSignal (const ()) (enqueued q) <>
   mapSignal (const ()) (dequeued q)
 
@@ -198,48 +193,6 @@ enqueueZeroEntryCountChanged_ :: Queue -> Signal ()
 enqueueZeroEntryCountChanged_ q =
   mapSignal (const ()) (dequeued q)
 
--- | Return the total number of input items that were dequeued.
---
--- See also 'dequeueCountChanged' and 'dequeueCountChanged_'.
-dequeueCount :: Queue -> Event Int
-dequeueCount q =
-  Event $ \p ->
-  do n1 <- readIORef (enqueueCountRef q)
-     n2 <- readIORef (queueCountRef q)
-     return (n1 - n2)
-  
--- | Signal when the 'dequeueCount' property value has changed.
-dequeueCountChanged :: Queue -> Signal Int
-dequeueCountChanged q =
-  mapSignalM (const $ dequeueCount q) (dequeueCountChanged_ q)
-  
--- | Signal when the 'dequeueCount' property value has changed.
-dequeueCountChanged_ :: Queue -> Signal ()
-dequeueCountChanged_ q =
-  mapSignal (const ()) (dequeued q)
-
--- | Return the rate of the input items that were enqueued: how many items
--- per time.
-enqueueRate :: Queue -> Event Double
-enqueueRate q =
-  Event $ \p ->
-  do x <- readIORef (enqueueCountRef q)
-     let t0 = spcStartTime $ pointSpecs p
-         t  = pointTime p
-     return (fromIntegral x / (t - t0))
-      
--- | Return the rate of the requests for dequeueing the items: how many requests
--- per time.
-dequeueRate :: Queue -> Event Double
-dequeueRate q =
-  Event $ \p ->
-  do n1 <- readIORef (enqueueCountRef q)
-     n2 <- readIORef (queueCountRef q)
-     let x  = n1 - n2
-         t0 = spcStartTime $ pointSpecs p
-         t  = pointTime p
-     return (fromIntegral x / (t - t0))
-      
 -- | Return the wait (or residence) time.
 --
 -- See also 'queueWaitTimeChanged' and 'queueWaitTimeChanged_'.
@@ -275,13 +228,13 @@ queueNonZeroEntryWaitTimeChanged_ q =
   mapSignal (const ()) (dequeued q)
 
 -- | Return a long-term average queue rate calculated as
--- the average queue size divided by the average wait time.
+-- the average queue content divided by the average wait time.
 --
 -- See also 'queueRateChanged' and 'queueRateChanged_'.
 queueRate :: Queue -> Event Double
 queueRate q =
   Event $ \p ->
-  do x <- readIORef (queueCountStatsRef q)
+  do x <- readIORef (queueContentStatsRef q)
      y <- readIORef (queueWaitTimeRef q)
      return (timingStatsMean x / samplingStatsMean y) 
       
@@ -309,8 +262,10 @@ enqueue :: Queue
            -- ^ the queue
            -> Transact a
            -- ^ the item to be enqueued
+           -> Int
+           -- ^ the content increment
            -> Event ()
-enqueue q transact =
+enqueue q transact increment =
   Event $ \p ->
   do let t = pointTime p
          e = QueueEntry { entryQueue = q,
@@ -318,10 +273,10 @@ enqueue q transact =
      n <- readIORef (enqueueCountRef q)
      let n' = n + 1
      n' `seq` writeIORef (enqueueCountRef q) n'
-     c <- readIORef (queueCountRef q)
-     let c' = c + 1
-     c' `seq` writeIORef (queueCountRef q) c'
-     modifyIORef' (queueCountStatsRef q) (addTimingStats t c')
+     c <- readIORef (queueContentRef q)
+     let c' = c + increment
+     c' `seq` writeIORef (queueContentRef q) c'
+     modifyIORef' (queueContentStatsRef q) (addTimingStats t c')
      invokeEvent p $
        registerTransactQueueEntry transact e
      invokeEvent p $
@@ -332,18 +287,20 @@ dequeue :: Queue
            -- ^ the queue
            -> Transact a
            -- ^ the item to be dequeued
+           -> Int
+           -- ^ the content decrement
            -> Event ()
-dequeue q transact =
+dequeue q transact decrement =
   Event $ \p ->
   do e <- invokeEvent p $
           unregisterTransactQueueEntry transact q
      let t  = pointTime p
          t0 = entryEnqueueTime e
          dt = t - t0
-     c <- readIORef (queueCountRef q)
-     let c' = c - 1
-     c' `seq` writeIORef (queueCountRef q) c'
-     modifyIORef' (queueCountStatsRef q) (addTimingStats t c')
+     c <- readIORef (queueContentRef q)
+     let c' = c - decrement
+     c' `seq` writeIORef (queueContentRef q) c'
+     modifyIORef' (queueContentStatsRef q) (addTimingStats t c')
      modifyIORef' (queueWaitTimeRef q) $
        addSamplingStats dt
      if t == t0
