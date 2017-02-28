@@ -18,6 +18,14 @@ import Simulation.Aivika
 import qualified Simulation.Aivika.GPSS.Queue as Q
 import Simulation.Aivika.GPSS.Facility
 
+-- | The queue identifier.
+queueId :: ResultId
+queueId =
+  LocalisedResultId $
+  M.fromList
+  [(russianResultLocale, "очередь"),
+   (englishResultLocale, "the queue")]
+
 -- | Property 'Q.queueNull'.
 queueNullId :: ResultId
 queueNullId =
@@ -105,6 +113,14 @@ queueRateId =
   M.fromList
   [(russianResultLocale, "усредненная скорость (как средняя длина очереди на среднее время ожидания)"),
    (englishResultLocale, "the average queue rate (= queue size / wait time)")]
+
+-- | The facility identifier.
+facilityId :: ResultId
+facilityId =
+  LocalisedResultId $
+  M.fromList
+  [(russianResultLocale, "прибор"),
+   (englishResultLocale, "the facility")]
 
 -- | Property 'facilityCount'.
 facilityCountId :: ResultId
