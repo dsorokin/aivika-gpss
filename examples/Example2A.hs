@@ -1,4 +1,21 @@
 
+{-
+
+  START 1
+
+  GENERATE 480
+  TERMINATE 1
+
+  GENERATE 18,6
+  QUEUE JOEQ
+  SEIZE JOE
+  DEPART JOEQ
+  ADVANCE 16,4
+  RELEASE JOE
+  TERMINATE
+
+ -}
+
 import Control.Category
 import Control.Monad.Trans
 
