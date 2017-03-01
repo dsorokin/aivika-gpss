@@ -413,7 +413,8 @@ preemptFacility r transact mode =
               Nothing ->
                 invokeEvent p $ processPreemptionBegin pid0
               Just transfer ->
-                do dt <- invokeEvent p $ processInterruptionTime pid0
+                do t2 <- invokeEvent p $ processInterruptionTime pid0
+                   let dt = fmap (\x -> x - t) t2
                    invokeEvent p $ transferTransact transact0 (transfer dt)
             invokeEvent p $ resumeCont c ()
        Just owner@(FacilityOwnerItem transact0 t0 preempting0)
@@ -429,7 +430,8 @@ preemptFacility r transact mode =
                 SimulationRetry
                 "The transfer destination is not specified for the removed preempted transact: preemptFacility"
               Just transfer ->
-                do dt <- invokeEvent p $ processInterruptionTime pid0
+                do t2 <- invokeEvent p $ processInterruptionTime pid0
+                   let dt = fmap (\x -> x - t) t2
                    invokeEvent p $ transferTransact transact0 (transfer dt)
             invokeEvent p $ resumeCont c ()
 
