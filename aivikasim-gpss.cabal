@@ -21,6 +21,8 @@ cabal-version:   >= 1.6
 build-type:      Simple
 tested-with:     GHC == 8.0.1
 
+extra-source-files:  examples/Example2A.hs
+
 library
 
     exposed-modules: Simulation.Aivika.GPSS
@@ -74,7 +76,7 @@ library
                      FlexibleContexts
                      
     ghc-options:     -O2
-
+    
 source-repository head
 
     type:     git
