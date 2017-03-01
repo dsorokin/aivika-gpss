@@ -1,10 +1,6 @@
 
 {-
-
-  START 1
-
-  GENERATE 480
-  TERMINATE 1
+  MODEL SEGMENT 1
 
   GENERATE 18,6
   QUEUE JOEQ
@@ -14,6 +10,12 @@
   RELEASE JOE
   TERMINATE
 
+  MODEL SEGMENT 2
+
+  GENERATE 480
+  TERMINATE 1
+
+  START 1
  -}
 
 import Control.Category
