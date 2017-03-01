@@ -30,7 +30,7 @@ import Simulation.Aivika.GPSS
 import qualified Simulation.Aivika.GPSS.Queue as Q
 
 specs = Specs { spcStartTime = 0.0,
-                spcStopTime = 2880000.0,
+                spcStopTime = 28800.0,
                 spcDT = 1.0,
                 spcMethod = RungeKutta4,
                 spcGeneratorType = SimpleGenerator }
