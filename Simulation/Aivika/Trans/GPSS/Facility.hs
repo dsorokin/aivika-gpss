@@ -123,10 +123,10 @@ instance MonadDES m => Eq (Facility m a) where
   x == y = facilityCountRef x == facilityCountRef y  -- unique references
 
 -- | The facility preemption mode.
-data FacilityPreemptMode m =
+data FacilityPreemptMode m a =
   FacilityPreemptMode { facilityPriorityMode :: Bool,
                         -- ^ the Priority mode; otherwise, the Interrupt mode
-                        facilityTransfer :: Maybe (Maybe Double -> Process m ()),
+                        facilityTransfer :: Maybe (Transact m a -> Maybe Double -> Process m ()),
                         -- ^ where to transfer the preempted transact,
                         -- passing in the remaining time in the ADVANCE block
                         facilityRemoveMode :: Bool
@@ -134,7 +134,7 @@ data FacilityPreemptMode m =
                       }
 
 -- | The default facility preemption mode.
-defaultFacilityPreemptMode :: FacilityPreemptMode m
+defaultFacilityPreemptMode :: FacilityPreemptMode m a
 defaultFacilityPreemptMode =
   FacilityPreemptMode { facilityPriorityMode = False,
                         facilityTransfer = Nothing,
@@ -380,7 +380,7 @@ preemptFacility :: MonadDES m
                    -- ^ the requested facility
                    -> Transact m a
                    -- ^ the transact that tries to preempt the facility
-                   -> FacilityPreemptMode m
+                   -> FacilityPreemptMode m a
                    -- ^ the Preempt mode
                    -> Process m ()
 {-# INLINABLE preemptFacility #-}
@@ -444,7 +444,7 @@ preemptFacility r transact mode =
                 do pid0 <- invokeEvent p $ requireTransactProcessId transact0
                    t2   <- invokeEvent p $ processInterruptionTime pid0
                    let dt = fmap (\x -> x - t) t2
-                   invokeEvent p $ transferTransact transact0 (transfer dt)
+                   invokeEvent p $ transferTransact transact0 (transfer transact0 dt)
             invokeEvent p $ resumeCont c ()
        Just owner@(FacilityOwnerItem transact0 t0 preempting0)
          | facilityRemoveMode mode ->
@@ -461,7 +461,7 @@ preemptFacility r transact mode =
                 do pid0 <- invokeEvent p $ requireTransactProcessId transact0
                    t2   <- invokeEvent p $ processInterruptionTime pid0
                    let dt = fmap (\x -> x - t) t2
-                   invokeEvent p $ transferTransact transact0 (transfer dt)
+                   invokeEvent p $ transferTransact transact0 (transfer transact0 dt)
             invokeEvent p $ resumeCont c ()
 
 -- | Return the facility by the active transact.

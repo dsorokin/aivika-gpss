@@ -13,7 +13,8 @@ module Simulation.Aivika.Trans.GPSS.Block.Preempt
        (preemptBlock,
         PreemptBlockMode(..),
         defaultPreemptBlockMode,
-        toFacilityPreemptMode) where
+        toFacilityPreemptMode,
+        fromFacilityPreemptMode) where
 
 import Simulation.Aivika.Trans
 import Simulation.Aivika.Trans.GPSS.Transact
@@ -32,9 +33,9 @@ data PreemptBlockMode m a =
                    }
 
 -- | Convert 'PreemptBlockMode' to 'FacilityPreemptMode'.
-toFacilityPreemptMode :: MonadDES m => PreemptBlockMode m a -> Transact m a -> FacilityPreemptMode m
+toFacilityPreemptMode :: MonadDES m => PreemptBlockMode m a -> FacilityPreemptMode m a
 {-# INLINABLE toFacilityPreemptMode #-}
-toFacilityPreemptMode m a =
+toFacilityPreemptMode m =
   FacilityPreemptMode { facilityPriorityMode = preemptBlockPriorityMode m,
                         facilityTransfer     = transfer,
                         facilityRemoveMode   = preemptBlockRemoveMode m
@@ -43,7 +44,21 @@ toFacilityPreemptMode m a =
     transfer =
       case preemptBlockTransfer m of
         Nothing -> Nothing
-        Just f  -> Just (\dt -> blockProcess (f dt) a)
+        Just f  -> Just (\a dt -> blockProcess (f dt) a)
+
+-- | Convert 'PreemptBlockMode' from 'FacilityPreemptMode'.
+fromFacilityPreemptMode :: MonadDES m => FacilityPreemptMode m a -> PreemptBlockMode m a
+{-# INLINABLE fromFacilityPreemptMode #-}
+fromFacilityPreemptMode m =
+  PreemptBlockMode { preemptBlockPriorityMode = facilityPriorityMode m,
+                     preemptBlockTransfer     = transfer,
+                     preemptBlockRemoveMode   = facilityRemoveMode m
+                   }
+  where
+    transfer =
+      case facilityTransfer m of
+        Nothing -> Nothing
+        Just f  -> Just (\dt -> Block $ \a -> f a dt)
 
 -- | The default Preempt block mode.
 defaultPreemptBlockMode :: MonadDES m => PreemptBlockMode m a
@@ -65,4 +80,4 @@ preemptBlock :: MonadDES m
                 -> Block m (Transact m a) (Transact m a)
 {-# INLINABLE preemptBlock #-}
 preemptBlock r m =
-  Block { blockProcess = \a -> preemptFacility r a (toFacilityPreemptMode m a) >> return a }
+  Block { blockProcess = \a -> preemptFacility r a (toFacilityPreemptMode m) >> return a }

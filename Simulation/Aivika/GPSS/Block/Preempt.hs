@@ -13,7 +13,8 @@ module Simulation.Aivika.GPSS.Block.Preempt
        (preemptBlock,
         PreemptBlockMode(..),
         defaultPreemptBlockMode,
-        toFacilityPreemptMode) where
+        toFacilityPreemptMode,
+        fromFacilityPreemptMode) where
 
 import Simulation.Aivika
 import Simulation.Aivika.GPSS.Transact
@@ -32,8 +33,8 @@ data PreemptBlockMode a =
                    }
 
 -- | Convert 'PreemptBlockMode' to 'FacilityPreemptMode'.
-toFacilityPreemptMode :: PreemptBlockMode a -> Transact a -> FacilityPreemptMode
-toFacilityPreemptMode m a =
+toFacilityPreemptMode :: PreemptBlockMode a -> FacilityPreemptMode a
+toFacilityPreemptMode m =
   FacilityPreemptMode { facilityPriorityMode = preemptBlockPriorityMode m,
                         facilityTransfer     = transfer,
                         facilityRemoveMode   = preemptBlockRemoveMode m
@@ -42,7 +43,20 @@ toFacilityPreemptMode m a =
     transfer =
       case preemptBlockTransfer m of
         Nothing -> Nothing
-        Just f  -> Just (\dt -> blockProcess (f dt) a)
+        Just f  -> Just (\a dt -> blockProcess (f dt) a)
+
+-- | Convert 'PreemptBlockMode' from 'FacilityPreemptMode'.
+fromFacilityPreemptMode :: FacilityPreemptMode a -> PreemptBlockMode a
+fromFacilityPreemptMode m =
+  PreemptBlockMode { preemptBlockPriorityMode = facilityPriorityMode m,
+                     preemptBlockTransfer     = transfer,
+                     preemptBlockRemoveMode   = facilityRemoveMode m
+                   }
+  where
+    transfer =
+      case facilityTransfer m of
+        Nothing -> Nothing
+        Just f  -> Just (\dt -> Block $ \a -> f a dt)
 
 -- | The default Preempt block mode.
 defaultPreemptBlockMode :: PreemptBlockMode a
@@ -61,4 +75,4 @@ preemptBlock :: Facility a
                 -- ^ the Preempt block mode
                 -> Block (Transact a) (Transact a)
 preemptBlock r m =
-  Block { blockProcess = \a -> preemptFacility r a (toFacilityPreemptMode m a) >> return a }
+  Block { blockProcess = \a -> preemptFacility r a (toFacilityPreemptMode m) >> return a }

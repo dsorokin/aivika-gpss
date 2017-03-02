@@ -123,10 +123,10 @@ instance Eq (Facility a) where
   x == y = facilityCountRef x == facilityCountRef y  -- unique references
 
 -- | The facility preemption mode.
-data FacilityPreemptMode =
+data FacilityPreemptMode a =
   FacilityPreemptMode { facilityPriorityMode :: Bool,
                         -- ^ the Priority mode; otherwise, the Interrupt mode
-                        facilityTransfer :: Maybe (Maybe Double -> Process ()),
+                        facilityTransfer :: Maybe (Transact a -> Maybe Double -> Process ()),
                         -- ^ where to transfer the preempted transact,
                         -- passing in the remaining time in the ADVANCE block
                         facilityRemoveMode :: Bool
@@ -134,7 +134,7 @@ data FacilityPreemptMode =
                       }
 
 -- | The default facility preemption mode.
-defaultFacilityPreemptMode :: FacilityPreemptMode
+defaultFacilityPreemptMode :: FacilityPreemptMode a
 defaultFacilityPreemptMode =
   FacilityPreemptMode { facilityPriorityMode = False,
                         facilityTransfer = Nothing,
@@ -352,7 +352,7 @@ preemptFacility :: Facility a
                    -- ^ the requested facility
                    -> Transact a
                    -- ^ the transact that tries to preempt the facility
-                   -> FacilityPreemptMode
+                   -> FacilityPreemptMode a
                    -- ^ the Preempt mode
                    -> Process ()
 preemptFacility r transact mode =
@@ -415,7 +415,7 @@ preemptFacility r transact mode =
                 do pid0 <- invokeEvent p $ requireTransactProcessId transact0
                    t2   <- invokeEvent p $ processInterruptionTime pid0
                    let dt = fmap (\x -> x - t) t2
-                   invokeEvent p $ transferTransact transact0 (transfer dt)
+                   invokeEvent p $ transferTransact transact0 (transfer transact0 dt)
             invokeEvent p $ resumeCont c ()
        Just owner@(FacilityOwnerItem transact0 t0 preempting0)
          | facilityRemoveMode mode ->
@@ -432,7 +432,7 @@ preemptFacility r transact mode =
                 do pid0 <- invokeEvent p $ requireTransactProcessId transact0
                    t2   <- invokeEvent p $ processInterruptionTime pid0
                    let dt = fmap (\x -> x - t) t2
-                   invokeEvent p $ transferTransact transact0 (transfer dt)
+                   invokeEvent p $ transferTransact transact0 (transfer transact0 dt)
             invokeEvent p $ resumeCont c ()
 
 -- | Return the facility by the active transact.
