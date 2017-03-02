@@ -11,7 +11,8 @@
 --
 module Simulation.Aivika.GPSS.Block
        (Block(..),
-        GeneratorBlock(..)) where
+        GeneratorBlock(..),
+        traceBlock) where
 
 import Control.Monad
 import Control.Monad.Trans
@@ -36,3 +37,8 @@ instance C.Category Block where
   id = Block { blockProcess = return }
 
   x . y = Block { blockProcess = \a -> do { b <- blockProcess y a; blockProcess x b } }
+
+-- | Trace the specified block.
+traceBlock :: String -> Block a b -> Block a b
+traceBlock message x =
+  Block { blockProcess = \a -> traceProcess message (blockProcess x a) }

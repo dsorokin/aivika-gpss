@@ -11,7 +11,8 @@
 --
 module Simulation.Aivika.Trans.GPSS.Block
        (Block(..),
-        GeneratorBlock(..)) where
+        GeneratorBlock(..),
+        traceBlock) where
 
 import Control.Monad
 import Control.Monad.Trans
@@ -38,3 +39,9 @@ instance MonadDES m => C.Category (Block m) where
 
   {-# INLINABLE (.) #-}
   x . y = Block { blockProcess = \a -> do { b <- blockProcess y a; blockProcess x b } }
+
+-- | Trace the specified block.
+traceBlock :: MonadDES m => String -> Block m a b -> Block m a b
+{-# INLINABLE traceBlock #-}
+traceBlock message x =
+  Block { blockProcess = \a -> traceProcess message (blockProcess x a) }
