@@ -532,8 +532,7 @@ releaseFacility' r transact preempting =
                 "The mismatch use of releaseFacility and returnFacility: releaseFacility'"
               Just (FacilityInterruptedItem transact0 t0 preempting0 running0) ->
                 do invokeEvent p $ updateFacilityQueueCount r (-1)
-                   invokeEvent p $ updateFacilityUtilisationCount r (-1)
-                   invokeEvent p $ updateFacilityHoldingTime r (t - t0)
+                   invokeEvent p $ updateFacilityWaitTime r (t - t0)
                    unless running0 $
                      invokeEvent p $ transactPreemptionEnd transact0
                    invokeEvent p $ resumeCont c ()
