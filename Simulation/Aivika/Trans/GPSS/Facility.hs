@@ -13,6 +13,7 @@ module Simulation.Aivika.Trans.GPSS.Facility
        (-- * Facility Type
         Facility,
         FacilityPreemptMode(..),
+        FacilityPreemptTransfer,
         -- * Creating Facility
         newFacility,
         -- * Resource Properties
@@ -110,7 +111,8 @@ data FacilityInterruptedItem m a =
   FacilityInterruptedItem { interruptedItemTransact :: Transact m a,
                             interruptedItemTime :: Double,
                             interruptedItemPreempting :: Bool,
-                            interruptedItemRunning :: Bool }
+                            interruptedItemRemainingTime :: Maybe Double,
+                            interruptedItemTransfer :: Maybe (FacilityPreemptTransfer m a) }
 
 -- | Idenitifies a transact item which is pending.
 data FacilityPendingItem m a =
@@ -126,12 +128,16 @@ instance MonadDES m => Eq (Facility m a) where
 data FacilityPreemptMode m a =
   FacilityPreemptMode { facilityPriorityMode :: Bool,
                         -- ^ the Priority mode; otherwise, the Interrupt mode
-                        facilityTransfer :: Maybe (Transact m a -> Maybe Double -> Process m ()),
+                        facilityTransfer :: Maybe (FacilityPreemptTransfer m a),
                         -- ^ where to transfer the preempted transact,
-                        -- passing in the remaining time in the ADVANCE block
+                        -- passing in the remaining time from the ADVANCE block
                         facilityRemoveMode :: Bool
                         -- ^ the Remove mode
                       }
+
+-- | Proceed with the computation by the specified preempted transaction
+-- and remaining time from the ADVANCE block.
+type FacilityPreemptTransfer m a = Transact m a -> Maybe Double -> Process m ()
 
 -- | The default facility preemption mode.
 defaultFacilityPreemptMode :: FacilityPreemptMode m a
@@ -427,28 +433,26 @@ preemptFacility r transact mode =
        Just owner@(FacilityOwnerItem transact0 t0 preempting0)
          | (not $ facilityRemoveMode mode) ->
          do invokeEvent p $ writeRef (facilityOwnerRef r) $ Just (FacilityOwnerItem transact t True)
-            let running = isJust (facilityTransfer mode)
+            pid0 <- invokeEvent p $ requireTransactProcessId transact0
+            t2   <- invokeEvent p $ processInterruptionTime pid0
+            let dt0 = fmap (\x -> x - t) t2
             invokeEvent p $
               strategyEnqueueWithPriority
               (facilityInterruptChain r)
               (transactPriority transact0)
-              (FacilityInterruptedItem transact0 t preempting0 running)
+              (FacilityInterruptedItem transact0 t preempting0 dt0 (facilityTransfer mode))
             invokeEvent p $ updateFacilityQueueCount r 1
             invokeEvent p $ updateFacilityWaitTime r 0
             invokeEvent p $ updateFacilityCaptureCount r 1
             invokeEvent p $ updateFacilityHoldingTime r (t - t0)
-            case facilityTransfer mode of
-              Nothing ->
-                invokeEvent p $ transactPreemptionBegin transact0
-              Just transfer ->
-                do pid0 <- invokeEvent p $ requireTransactProcessId transact0
-                   t2   <- invokeEvent p $ processInterruptionTime pid0
-                   let dt = fmap (\x -> x - t) t2
-                   invokeEvent p $ transferTransact transact0 (transfer transact0 dt)
+            invokeEvent p $ transactPreemptionBegin transact0
             invokeEvent p $ resumeCont c ()
        Just owner@(FacilityOwnerItem transact0 t0 preempting0)
          | facilityRemoveMode mode ->
          do invokeEvent p $ writeRef (facilityOwnerRef r) $ Just (FacilityOwnerItem transact t True)
+            pid0 <- invokeEvent p $ requireTransactProcessId transact0
+            t2   <- invokeEvent p $ processInterruptionTime pid0
+            let dt0 = fmap (\x -> x - t) t2
             invokeEvent p $ updateFacilityWaitTime r 0
             invokeEvent p $ updateFacilityCaptureCount r 1
             invokeEvent p $ updateFacilityHoldingTime r (t - t0)
@@ -458,10 +462,7 @@ preemptFacility r transact mode =
                 SimulationRetry
                 "The transfer destination is not specified for the removed preempted transact: preemptFacility"
               Just transfer ->
-                do pid0 <- invokeEvent p $ requireTransactProcessId transact0
-                   t2   <- invokeEvent p $ processInterruptionTime pid0
-                   let dt = fmap (\x -> x - t) t2
-                   invokeEvent p $ transferTransact transact0 (transfer transact0 dt)
+                invokeEvent p $ transferTransact transact0 (transfer transact0 dt0)
             invokeEvent p $ resumeCont c ()
 
 -- | Return the facility by the active transact.
@@ -516,26 +517,9 @@ releaseFacility' r transact preempting =
             invokeEvent p $ releaseFacility'' r
             invokeEvent p $ resumeCont c ()
        Just owner ->
-         do a <- invokeEvent p $
-                 transactStrategyQueueDeleteBy
-                 (facilityInterruptChain r)
-                 (transactPriority transact)
-                 (\x -> interruptedItemTransact x == transact)
-            case a of
-              Nothing ->
-                throwComp $
-                SimulationRetry
-                "Could not find the transact in the interrupt chain: releaseFacility'"
-              Just (FacilityInterruptedItem transact0 t0 preempting0 running0) | preempting0 /= preempting ->
-                throwComp $
-                SimulationRetry
-                "The mismatch use of releaseFacility and returnFacility: releaseFacility'"
-              Just (FacilityInterruptedItem transact0 t0 preempting0 running0) ->
-                do invokeEvent p $ updateFacilityQueueCount r (-1)
-                   invokeEvent p $ updateFacilityWaitTime r (t - t0)
-                   unless running0 $
-                     invokeEvent p $ transactPreemptionEnd transact0
-                   invokeEvent p $ resumeCont c ()
+         throwComp $
+         SimulationRetry
+         "The facility has another owner: releaseFacility'"
 
 -- | Find another owner of the facility.
 releaseFacility'' :: MonadDES m => Facility m a -> Event m ()
@@ -559,7 +543,7 @@ releaseFacility'' r =
                       invokeEvent p $ enqueueEvent t $ reenterCont c ()
        else do f <- invokeEvent p $ strategyQueueNull (facilityInterruptChain r)
                if not f
-                  then do FacilityInterruptedItem transact t0 preempting running <- invokeEvent p $ strategyDequeue (facilityInterruptChain r)
+                  then do FacilityInterruptedItem transact t0 preempting dt0 transfer0 <- invokeEvent p $ strategyDequeue (facilityInterruptChain r)
                           pid <- invokeEvent p $ requireTransactProcessId transact
                           invokeEvent p $ updateFacilityQueueCount r (-1)
                           f <- invokeEvent p $ processCancelled pid
@@ -570,8 +554,11 @@ releaseFacility'' r =
                               do invokeEvent p $ writeRef (facilityOwnerRef r) $ Just (FacilityOwnerItem transact t preempting)
                                  invokeEvent p $ updateFacilityWaitTime r (t - t0)
                                  invokeEvent p $ updateFacilityUtilisationCount r 1
-                                 unless running $
-                                   invokeEvent p $ transactPreemptionEnd transact
+                                 case transfer0 of
+                                   Nothing -> return ()
+                                   Just transfer ->
+                                     invokeEvent p $ transferTransact transact (transfer transact dt0)
+                                 invokeEvent p $ transactPreemptionEnd transact
                  else do f <- invokeEvent p $ strategyQueueNull (facilityDelayChain r)
                          if not f
                            then do FacilityDelayedItem transact t0 preempting c0 <- invokeEvent p $ strategyDequeue (facilityDelayChain r)
