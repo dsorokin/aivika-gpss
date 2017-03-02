@@ -97,7 +97,8 @@ data Facility a =
 data FacilityOwnerItem a =
   FacilityOwnerItem { ownerItemTransact :: Transact a,
                       ownerItemTime :: Double,
-                      ownerItemPreempting :: Bool }
+                      ownerItemPreempting :: Bool,
+                      ownerItemAccHoldingTime :: Double }
 
 -- | Idenitifies a transact item that was delayed.
 data FacilityDelayedItem a =
@@ -112,7 +113,8 @@ data FacilityInterruptedItem a =
                             interruptedItemTime :: Double,
                             interruptedItemPreempting :: Bool,
                             interruptedItemRemainingTime :: Maybe Double,
-                            interruptedItemTransfer :: Maybe (FacilityPreemptTransfer a) }
+                            interruptedItemTransfer :: Maybe (FacilityPreemptTransfer a),
+                            interruptedItemAccHoldingTime :: Double }
 
 -- | Idenitifies a transact item which is pending.
 data FacilityPendingItem a =
@@ -334,7 +336,7 @@ seizeFacility r transact =
      a <- readIORef (facilityOwnerRef r)
      case a of
        Nothing ->
-         do writeIORef (facilityOwnerRef r) $ Just (FacilityOwnerItem transact t False)
+         do writeIORef (facilityOwnerRef r) $ Just (FacilityOwnerItem transact t False 0)
             invokeEvent p $ updateFacilityWaitTime r 0
             invokeEvent p $ updateFacilityCount r (-1)
             invokeEvent p $ updateFacilityCaptureCount r 1
@@ -369,13 +371,13 @@ preemptFacility r transact mode =
      a <- readIORef (facilityOwnerRef r)
      case a of
        Nothing ->
-         do writeIORef (facilityOwnerRef r) $ Just (FacilityOwnerItem transact t True)
+         do writeIORef (facilityOwnerRef r) $ Just (FacilityOwnerItem transact t True 0)
             invokeEvent p $ updateFacilityWaitTime r 0
             invokeEvent p $ updateFacilityCount r (-1)
             invokeEvent p $ updateFacilityCaptureCount r 1
             invokeEvent p $ updateFacilityUtilisationCount r 1
             invokeEvent p $ resumeCont c ()
-       Just owner@(FacilityOwnerItem transact0 t0 preempting0)
+       Just owner@(FacilityOwnerItem transact0 t0 preempting0 acc0)
          | (not $ facilityPriorityMode mode) && preempting0 ->
          do c <- invokeEvent p $
                  freezeContReentering c () $
@@ -388,7 +390,7 @@ preemptFacility r transact mode =
               (transactPriority transact)
               (FacilityPendingItem transact t True c)
             invokeEvent p $ updateFacilityQueueCount r 1
-       Just owner@(FacilityOwnerItem transact0 t0 preempting0)
+       Just owner@(FacilityOwnerItem transact0 t0 preempting0 acc0)
          | facilityPriorityMode mode && (transactPriority transact <= transactPriority transact0) ->
          do c <- invokeEvent p $
                  freezeContReentering c () $
@@ -401,9 +403,9 @@ preemptFacility r transact mode =
               (transactPriority transact)
               (FacilityDelayedItem transact t True c)
             invokeEvent p $ updateFacilityQueueCount r 1
-       Just owner@(FacilityOwnerItem transact0 t0 preempting0)
+       Just owner@(FacilityOwnerItem transact0 t0 preempting0 acc0)
          | (not $ facilityRemoveMode mode) ->
-         do writeIORef (facilityOwnerRef r) $ Just (FacilityOwnerItem transact t True)
+         do writeIORef (facilityOwnerRef r) $ Just (FacilityOwnerItem transact t True 0)
             pid0 <- invokeEvent p $ requireTransactProcessId transact0
             t2   <- invokeEvent p $ processInterruptionTime pid0
             let dt0 = fmap (\x -> x - t) t2
@@ -411,22 +413,21 @@ preemptFacility r transact mode =
               strategyEnqueueWithPriority
               (facilityInterruptChain r)
               (transactPriority transact0)
-              (FacilityInterruptedItem transact0 t preempting0 dt0 (facilityTransfer mode))
+              (FacilityInterruptedItem transact0 t preempting0 dt0 (facilityTransfer mode) (acc0 + (t - t0)))
             invokeEvent p $ updateFacilityQueueCount r 1
             invokeEvent p $ updateFacilityWaitTime r 0
             invokeEvent p $ updateFacilityCaptureCount r 1
-            invokeEvent p $ updateFacilityHoldingTime r (t - t0)
             invokeEvent p $ transactPreemptionBegin transact0
             invokeEvent p $ resumeCont c ()
-       Just owner@(FacilityOwnerItem transact0 t0 preempting0)
+       Just owner@(FacilityOwnerItem transact0 t0 preempting0 acc0)
          | facilityRemoveMode mode ->
-         do writeIORef (facilityOwnerRef r) $ Just (FacilityOwnerItem transact t True)
+         do writeIORef (facilityOwnerRef r) $ Just (FacilityOwnerItem transact t True 0)
             pid0 <- invokeEvent p $ requireTransactProcessId transact0
             t2   <- invokeEvent p $ processInterruptionTime pid0
             let dt0 = fmap (\x -> x - t) t2
             invokeEvent p $ updateFacilityWaitTime r 0
             invokeEvent p $ updateFacilityCaptureCount r 1
-            invokeEvent p $ updateFacilityHoldingTime r (t - t0)
+            invokeEvent p $ updateFacilityHoldingTime r (acc0 + (t - t0))
             case facilityTransfer mode of
               Nothing ->
                 throwIO $
@@ -471,14 +472,14 @@ releaseFacility' r transact preempting =
          throwIO $
          SimulationRetry
          "There is no owner of the facility: releaseFacility'"
-       Just owner@(FacilityOwnerItem transact0 t0 preempting0) | transact0 == transact && preempting0 /= preempting ->
+       Just owner@(FacilityOwnerItem transact0 t0 preempting0 acc0) | transact0 == transact && preempting0 /= preempting ->
          throwIO $
          SimulationRetry
          "The mismatch use of releaseFacility and returnFacility: releaseFacility'"
-       Just owner@(FacilityOwnerItem transact0 t0 preempting0) | transact0 == transact ->
+       Just owner@(FacilityOwnerItem transact0 t0 preempting0 acc0) | transact0 == transact ->
          do writeIORef (facilityOwnerRef r) Nothing
             invokeEvent p $ updateFacilityUtilisationCount r (-1)
-            invokeEvent p $ updateFacilityHoldingTime r (t - t0)
+            invokeEvent p $ updateFacilityHoldingTime r (acc0 + (t - t0))
             invokeEvent p $ releaseFacility'' r
             invokeEvent p $ resumeCont c ()
        Just owner ->
@@ -500,14 +501,14 @@ releaseFacility'' r =
                  Nothing ->
                    invokeEvent p $ releaseFacility'' r
                  Just c ->
-                   do writeIORef (facilityOwnerRef r) $ Just (FacilityOwnerItem transact t preempting)
+                   do writeIORef (facilityOwnerRef r) $ Just (FacilityOwnerItem transact t preempting 0)
                       invokeEvent p $ updateFacilityWaitTime r (t - t0)
                       invokeEvent p $ updateFacilityUtilisationCount r 1
                       invokeEvent p $ updateFacilityCaptureCount r 1
                       invokeEvent p $ enqueueEvent t $ reenterCont c ()
        else do f <- invokeEvent p $ strategyQueueNull (facilityInterruptChain r)
                if not f
-                  then do FacilityInterruptedItem transact t0 preempting dt0 transfer0 <- invokeEvent p $ strategyDequeue (facilityInterruptChain r)
+                  then do FacilityInterruptedItem transact t0 preempting dt0 transfer0 acc0 <- invokeEvent p $ strategyDequeue (facilityInterruptChain r)
                           pid <- invokeEvent p $ requireTransactProcessId transact
                           invokeEvent p $ updateFacilityQueueCount r (-1)
                           f <- invokeEvent p $ processCancelled pid
@@ -515,7 +516,7 @@ releaseFacility'' r =
                             True ->
                               invokeEvent p $ releaseFacility'' r
                             False ->
-                              do writeIORef (facilityOwnerRef r) $ Just (FacilityOwnerItem transact t preempting)
+                              do writeIORef (facilityOwnerRef r) $ Just (FacilityOwnerItem transact t preempting acc0)
                                  invokeEvent p $ updateFacilityWaitTime r (t - t0)
                                  invokeEvent p $ updateFacilityUtilisationCount r 1
                                  case transfer0 of
@@ -532,7 +533,7 @@ releaseFacility'' r =
                                      Nothing ->
                                        invokeEvent p $ releaseFacility'' r
                                      Just c ->
-                                       do writeIORef (facilityOwnerRef r) $ Just (FacilityOwnerItem transact t preempting)
+                                       do writeIORef (facilityOwnerRef r) $ Just (FacilityOwnerItem transact t preempting 0)
                                           invokeEvent p $ updateFacilityWaitTime r (t - t0)
                                           invokeEvent p $ updateFacilityUtilisationCount r 1
                                           invokeEvent p $ updateFacilityCaptureCount r 1
