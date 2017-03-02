@@ -408,12 +408,12 @@ preemptFacility r transact mode =
             invokeEvent p $ updateFacilityWaitTime r 0
             invokeEvent p $ updateFacilityCaptureCount r 1
             invokeEvent p $ updateFacilityHoldingTime r (t - t0)
-            pid0 <- invokeEvent p $ requireTransactProcessId transact0
             case facilityTransfer mode of
               Nothing ->
-                invokeEvent p $ processPreemptionBegin pid0
+                invokeEvent p $ transactPreemptionBegin transact0
               Just transfer ->
-                do t2 <- invokeEvent p $ processInterruptionTime pid0
+                do pid0 <- invokeEvent p $ requireTransactProcessId transact0
+                   t2   <- invokeEvent p $ processInterruptionTime pid0
                    let dt = fmap (\x -> x - t) t2
                    invokeEvent p $ transferTransact transact0 (transfer dt)
             invokeEvent p $ resumeCont c ()
@@ -423,14 +423,14 @@ preemptFacility r transact mode =
             invokeEvent p $ updateFacilityWaitTime r 0
             invokeEvent p $ updateFacilityCaptureCount r 1
             invokeEvent p $ updateFacilityHoldingTime r (t - t0)
-            pid0 <- invokeEvent p $ requireTransactProcessId transact0
             case facilityTransfer mode of
               Nothing ->
                 throwIO $
                 SimulationRetry
                 "The transfer destination is not specified for the removed preempted transact: preemptFacility"
               Just transfer ->
-                do t2 <- invokeEvent p $ processInterruptionTime pid0
+                do pid0 <- invokeEvent p $ requireTransactProcessId transact0
+                   t2   <- invokeEvent p $ processInterruptionTime pid0
                    let dt = fmap (\x -> x - t) t2
                    invokeEvent p $ transferTransact transact0 (transfer dt)
             invokeEvent p $ resumeCont c ()
@@ -500,8 +500,7 @@ releaseFacility' r transact preempting =
                    invokeEvent p $ updateFacilityUtilisationCount r (-1)
                    invokeEvent p $ updateFacilityHoldingTime r (t - t0)
                    unless running0 $
-                     do pid0 <- invokeEvent p $ requireTransactProcessId transact0
-                        invokeEvent p $ processPreemptionEnd pid0
+                     invokeEvent p $ transactPreemptionEnd transact0
                    invokeEvent p $ resumeCont c ()
 
 -- | Find another owner of the facility.
@@ -537,7 +536,7 @@ releaseFacility'' r =
                                  invokeEvent p $ updateFacilityWaitTime r (t - t0)
                                  invokeEvent p $ updateFacilityUtilisationCount r 1
                                  unless running $
-                                   invokeEvent p $ processPreemptionEnd pid
+                                   invokeEvent p $ transactPreemptionEnd transact
                  else do f <- invokeEvent p $ strategyQueueNull (facilityDelayChain r)
                          if not f
                            then do FacilityDelayedItem transact t0 preempting c0 <- invokeEvent p $ strategyDequeue (facilityDelayChain r)
