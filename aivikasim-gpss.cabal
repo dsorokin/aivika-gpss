@@ -24,6 +24,7 @@ tested-with:     GHC == 8.0.1
 extra-source-files:  examples/Example2A.hs
                      examples/Example2ATrans.hs
                      examples/Example2B.hs
+                     examples/Example2BTrans.hs
                      examples/Example2C.hs
                      examples/Example2D.hs
                      examples/Example7-26.hs
