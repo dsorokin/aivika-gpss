@@ -30,6 +30,7 @@ extra-source-files:  examples/Example2A.hs
                      examples/Example2D.hs
                      examples/Example2DTrans.hs
                      examples/Example7-26.hs
+                     examples/Example7-26Trans.hs
 
 library
 
