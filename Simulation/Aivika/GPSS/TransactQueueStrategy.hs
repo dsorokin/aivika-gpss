@@ -1,5 +1,5 @@
 
-{-# LANGUAGE TypeFamilies, MultiParamTypeClasses #-}
+{-# LANGUAGE TypeFamilies, MultiParamTypeClasses, FlexibleInstances, FlexibleContexts #-}
 
 -- |
 -- Module     : Simulation.Aivika.GPSS.TransactQueueStrategy
@@ -26,19 +26,14 @@ import Simulation.Aivika
 import qualified Simulation.Aivika.DoubleLinkedList as DLL
 
 -- | The transact queue strategy.
-data TransactQueueStrategy = InnerFCFSTransactQueueStrategy
-                             -- ^ sorted by priority but then by FCSF (FIFO)
-                             -- within transacts of the same priority
-                           | InnerLCFSTransactQueueStrategy
-                             -- ^ sorted by priority but then by LCFS (LIFO)
-                             -- within transacts of the same priority
+data TransactQueueStrategy s = TransactQueueStrategy s
 
 -- | An implementation of the 'QueueStrategy' class.
-instance QueueStrategy TransactQueueStrategy where
+instance QueueStrategy (TransactQueueStrategy s) where
 
   -- | A queue used by the 'TransactQueueStrategy' strategy.
-  data StrategyQueue TransactQueueStrategy a =
-    TransactStrategyQueue { transactStrategy :: TransactQueueStrategy,
+  data StrategyQueue (TransactQueueStrategy s) a =
+    TransactStrategyQueue { transactStrategy :: TransactQueueStrategy s,
                             -- ^ the strategy itself
                             transactStrategyQueue :: IORef (M.IntMap (DLL.DoubleLinkedList a))
                             -- ^ the transact queue
@@ -54,46 +49,84 @@ instance QueueStrategy TransactQueueStrategy where
     do m <- readIORef (transactStrategyQueue q)
        return $ M.null m
 
-instance DequeueStrategy TransactQueueStrategy where
+instance DequeueStrategy (TransactQueueStrategy FCFS) where
 
   strategyDequeue q =
     liftIO $ 
     do m <- readIORef (transactStrategyQueue q)
-       let (p, xs) = M.findMax m
-           extract =
-             case transactStrategy q of
-               InnerFCFSTransactQueueStrategy ->
-                 do i <- DLL.listFirst xs
-                    DLL.listRemoveFirst xs
-                    return i
-               InnerLCFSTransactQueueStrategy ->
-                 do i <- DLL.listLast xs
-                    DLL.listRemoveLast xs
-                    return i
-       i <- extract
+       let (k, xs) = M.findMin m
+       i <- DLL.listFirst xs
+       DLL.listRemoveFirst xs
        empty <- DLL.listNull xs
        when empty $
          modifyIORef (transactStrategyQueue q) $
-         M.delete p
+         M.delete k
        return i
 
-instance PriorityQueueStrategy TransactQueueStrategy Int where
+instance DequeueStrategy (TransactQueueStrategy LCFS) where
 
-  strategyEnqueueWithPriority q p i =
+  strategyDequeue q =
+    liftIO $ 
+    do m <- readIORef (transactStrategyQueue q)
+       let (k, xs) = M.findMin m
+       i <- DLL.listLast xs
+       DLL.listRemoveLast xs
+       empty <- DLL.listNull xs
+       when empty $
+         modifyIORef (transactStrategyQueue q) $
+         M.delete k
+       return i
+
+instance DequeueStrategy (TransactQueueStrategy s) => PriorityQueueStrategy (TransactQueueStrategy s) Int where
+
+  {-# SPECIALISE instance PriorityQueueStrategy (TransactQueueStrategy FCFS) Int #-}
+  {-# SPECIALISE instance PriorityQueueStrategy (TransactQueueStrategy LCFS) Int #-}
+  
+  strategyEnqueueWithPriority q priority i =
     liftIO $
     do m <- readIORef (transactStrategyQueue q)
-       let xs = M.lookup p m
+       let k  = - priority
+           xs = M.lookup k m
        case xs of
          Nothing ->
            do xs <- DLL.newList
               DLL.listAddLast xs i
               modifyIORef (transactStrategyQueue q) $
-                M.insert p xs
+                M.insert k xs
          Just xs ->
            DLL.listAddLast xs i
 
+instance DeletingQueueStrategy (TransactQueueStrategy FCFS) where
+
+  strategyQueueDeleteBy q pred =
+    liftIO $
+    do m <- readIORef (transactStrategyQueue q)
+       let loop [] = return Nothing
+           loop ((k, xs): tail) =
+             do a <- DLL.listRemoveBy xs pred
+                case a of
+                  Nothing -> loop tail
+                  Just _  ->
+                    do empty <- DLL.listNull xs
+                       when empty $
+                         modifyIORef (transactStrategyQueue q) $
+                         M.delete k
+                       return a
+       loop (M.assocs m)
+
+  strategyQueueContainsBy q pred =
+    liftIO $
+    do m <- readIORef (transactStrategyQueue q)
+       let loop [] = return Nothing
+           loop ((k, xs): tail) =
+             do a <- DLL.listContainsBy xs pred
+                case a of
+                  Nothing -> loop tail
+                  Just _  -> return a
+       loop (M.assocs m)
+
 -- | Try to delete the transact by the specified priority and satisfying to the provided predicate.
-transactStrategyQueueDeleteBy :: StrategyQueue TransactQueueStrategy a
+transactStrategyQueueDeleteBy :: StrategyQueue (TransactQueueStrategy s) a
                                  -- ^ the queue
                                  -> Int
                                  -- ^ the transact priority
@@ -103,7 +136,8 @@ transactStrategyQueueDeleteBy :: StrategyQueue TransactQueueStrategy a
 transactStrategyQueueDeleteBy q priority pred =
   liftIO $
   do m <- readIORef (transactStrategyQueue q)
-     let xs = M.lookup priority m
+     let k  = - priority
+         xs = M.lookup k m
      case xs of
        Nothing -> return Nothing
        Just xs ->
@@ -111,11 +145,11 @@ transactStrategyQueueDeleteBy q priority pred =
             empty <- DLL.listNull xs
             when empty $
               modifyIORef (transactStrategyQueue q) $
-              M.delete priority
+              M.delete k
             return a
 
 -- | Test whether the queue contains a transact with the specified priority satisfying the provided predicate.
-transactStrategyQueueContainsBy :: StrategyQueue TransactQueueStrategy a
+transactStrategyQueueContainsBy :: StrategyQueue (TransactQueueStrategy s) a
                                    -- ^ the queue
                                    -> Int
                                    -- ^ the transact priority
@@ -125,7 +159,8 @@ transactStrategyQueueContainsBy :: StrategyQueue TransactQueueStrategy a
 transactStrategyQueueContainsBy q priority pred =
   liftIO $
   do m <- readIORef (transactStrategyQueue q)
-     let xs = M.lookup priority m
+     let k  = - priority
+         xs = M.lookup k m
      case xs of
        Nothing -> return Nothing
        Just xs -> DLL.listContainsBy xs pred

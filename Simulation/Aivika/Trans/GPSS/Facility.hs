@@ -89,9 +89,9 @@ data Facility m a =
              facilityHoldingTimeRef :: Ref m (SamplingStats Double),
              facilityHoldingTimeSource :: SignalSource m (),
              facilityOwnerRef :: Ref m (Maybe (FacilityOwnerItem m a)),
-             facilityDelayChain :: StrategyQueue m TransactQueueStrategy (FacilityDelayedItem m a),
-             facilityInterruptChain :: StrategyQueue m TransactQueueStrategy (FacilityInterruptedItem m a),
-             facilityPendingChain :: StrategyQueue m TransactQueueStrategy (FacilityPendingItem m a) }
+             facilityDelayChain :: StrategyQueue m (TransactQueueStrategy FCFS) (FacilityDelayedItem m a),
+             facilityInterruptChain :: StrategyQueue m (TransactQueueStrategy LCFS) (FacilityInterruptedItem m a),
+             facilityPendingChain :: StrategyQueue m (TransactQueueStrategy LCFS) (FacilityPendingItem m a) }
 
 -- | Identifies a transact item that owns the facility.
 data FacilityOwnerItem m a =
@@ -174,9 +174,9 @@ newFacility =
      holdingTimeRef <- invokeSimulation r $ newRef emptySamplingStats
      holdingTimeSource <- invokeSimulation r newSignalSource
      ownerRef <- invokeSimulation r $ newRef Nothing
-     delayChain <- invokeSimulation r $ newStrategyQueue InnerFCFSTransactQueueStrategy
-     interruptChain <- invokeSimulation r $ newStrategyQueue InnerLCFSTransactQueueStrategy
-     pendingChain <- invokeSimulation r $ newStrategyQueue InnerLCFSTransactQueueStrategy
+     delayChain <- invokeSimulation r $ newStrategyQueue (TransactQueueStrategy FCFS)
+     interruptChain <- invokeSimulation r $ newStrategyQueue (TransactQueueStrategy LCFS)
+     pendingChain <- invokeSimulation r $ newStrategyQueue (TransactQueueStrategy LCFS)
      return Facility { facilityCountRef = countRef,
                        facilityCountStatsRef = countStatsRef,
                        facilityCountSource = countSource,
