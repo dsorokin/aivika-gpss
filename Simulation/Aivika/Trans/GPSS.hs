@@ -13,6 +13,7 @@ module Simulation.Aivika.Trans.GPSS
        (-- * Modules
         module Simulation.Aivika.Trans.GPSS.Block,
         module Simulation.Aivika.Trans.GPSS.Block.Advance,
+        module Simulation.Aivika.Trans.GPSS.Block.Assign,
         module Simulation.Aivika.Trans.GPSS.Block.Depart,
         module Simulation.Aivika.Trans.GPSS.Block.Enter,
         module Simulation.Aivika.Trans.GPSS.Block.Generate,
@@ -32,6 +33,7 @@ module Simulation.Aivika.Trans.GPSS
 
 import Simulation.Aivika.Trans.GPSS.Block
 import Simulation.Aivika.Trans.GPSS.Block.Advance
+import Simulation.Aivika.Trans.GPSS.Block.Assign
 import Simulation.Aivika.Trans.GPSS.Block.Depart
 import Simulation.Aivika.Trans.GPSS.Block.Enter
 import Simulation.Aivika.Trans.GPSS.Block.Generate
