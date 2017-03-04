@@ -184,7 +184,7 @@ storageContentChanged_ :: MonadDES m => Storage m -> Signal m ()
 storageContentChanged_ r =
   mapSignal (const ()) $ storageContentChanged r
 
--- | Return the current use count of the storage.
+-- | Return the total use count of the storage.
 storageUseCount :: MonadDES m => Storage m -> Event m Int
 {-# INLINABLE storageUseCount #-}
 storageUseCount r =
@@ -202,7 +202,7 @@ storageUseCountChanged_ :: MonadDES m => Storage m -> Signal m ()
 storageUseCountChanged_ r =
   mapSignal (const ()) $ storageUseCountChanged r
 
--- | Return the current used content of the storage.
+-- | Return the total used content of the storage.
 storageUsedContent :: MonadDES m => Storage m -> Event m Int
 {-# INLINABLE storageUsedContent #-}
 storageUsedContent r =

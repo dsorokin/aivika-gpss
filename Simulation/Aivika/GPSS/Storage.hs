@@ -175,7 +175,7 @@ storageContentChanged_ :: Storage -> Signal ()
 storageContentChanged_ r =
   mapSignal (const ()) $ storageContentChanged r
 
--- | Return the current use count of the storage.
+-- | Return the total use count of the storage.
 storageUseCount :: Storage -> Event Int
 storageUseCount r =
   Event $ \p -> readIORef (storageUseCountRef r)
@@ -190,7 +190,7 @@ storageUseCountChanged_ :: Storage -> Signal ()
 storageUseCountChanged_ r =
   mapSignal (const ()) $ storageUseCountChanged r
 
--- | Return the current used content of the storage.
+-- | Return the total used content of the storage.
 storageUsedContent :: Storage -> Event Int
 storageUsedContent r =
   Event $ \p -> readIORef (storageUsedContentRef r)
