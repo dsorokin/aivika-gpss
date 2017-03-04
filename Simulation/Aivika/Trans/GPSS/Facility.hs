@@ -132,13 +132,14 @@ data FacilityPreemptMode m a =
                         -- ^ the Priority mode; otherwise, the Interrupt mode
                         facilityTransfer :: Maybe (FacilityPreemptTransfer m a),
                         -- ^ where to transfer the preempted transact,
-                        -- passing in the remaining time from the ADVANCE block
+                        -- passing in the remaining time from the process holding
+                        -- computation such as the ADVANCE block
                         facilityRemoveMode :: Bool
                         -- ^ the Remove mode
                       }
 
--- | Proceed with the computation by the specified preempted transaction
--- and remaining time from the ADVANCE block.
+-- | Proceed with the computation by the specified preempted transact
+-- and remaining time from the process holding computation such as the ADVANCE block.
 type FacilityPreemptTransfer m a = Transact m a -> Maybe Double -> Process m ()
 
 -- | The default facility preemption mode.
