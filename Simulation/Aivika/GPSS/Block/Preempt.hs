@@ -27,7 +27,7 @@ data PreemptBlockMode a =
                      -- ^ the Priority mode; otherwise, the Interrupt mode
                      preemptBlockTransfer :: Maybe (Maybe Double -> Block (Transact a) ()),
                      -- ^ where to transfer the preempted transact,
-                     -- passing in the remaining time in the ADVANCE block
+                     -- passing in the remaining time from the ADVANCE block
                      preemptBlockRemoveMode :: Bool
                      -- ^ the Remove mode
                    }
