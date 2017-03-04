@@ -16,7 +16,7 @@ module Simulation.Aivika.Trans.GPSS.Facility
         FacilityPreemptTransfer,
         -- * Creating Facility
         newFacility,
-        -- * Resource Properties
+        -- * Facility Properties
         facilityCount,
         facilityCountStats,
         facilityCaptureCount,
