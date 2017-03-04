@@ -20,6 +20,7 @@ import Simulation.Aivika.Trans
 
 import qualified Simulation.Aivika.Trans.GPSS.Queue as Q
 import Simulation.Aivika.Trans.GPSS.Facility
+import Simulation.Aivika.Trans.GPSS.Storage
 import Simulation.Aivika.Trans.GPSS.Results.Locale
   
 -- | Return a source by the specified queue.
@@ -114,6 +115,58 @@ facilityResultSummary c =
       resultContainerProperty c "captureCount" facilityCaptureCountId facilityCaptureCount facilityCaptureCountChanged_,
       resultContainerProperty c "utilisationCountStats" facilityUtilisationCountStatsId facilityUtilisationCountStats facilityUtilisationCountChanged_ ] }
 
+-- | Return a source by the specified storage.
+storageResultSource :: MonadDES m
+                       => ResultContainer (Storage m) m
+                       -- ^ the storage container
+                       -> ResultSource m
+storageResultSource c =
+  ResultObjectSource $
+  ResultObject {
+    resultObjectName = resultContainerName c,
+    resultObjectId = resultContainerId c,
+    resultObjectTypeId = storageId,
+    resultObjectSignal = resultContainerSignal c,
+    resultObjectSummary = storageResultSummary c,
+    resultObjectProperties = [
+      resultContainerConstProperty c "capacity" storageCapacityId storageCapacity,
+      resultContainerIntegProperty c "empty" storageEmptyId storageEmpty,
+      resultContainerIntegProperty c "full" storageFullId storageFull,
+      resultContainerProperty c "queueCount" storageQueueCountId storageQueueCount storageQueueCountChanged_,
+      resultContainerProperty c "queueCountStats" storageQueueCountStatsId storageQueueCountStats storageQueueCountChanged_,
+      resultContainerProperty c "totalWaitTime" storageTotalWaitTimeId storageTotalWaitTime storageWaitTimeChanged_,
+      resultContainerProperty c "waitTime" storageWaitTimeId storageWaitTime storageWaitTimeChanged_,
+      resultContainerIntegProperty c "averageHoldingTime" storageAverageHoldingTimeId storageAverageHoldingTime,
+      resultContainerProperty c "content" storageContentId storageContent storageContentChanged_,
+      resultContainerProperty c "contentStats" storageContentStatsId storageContentStats storageContentChanged_,
+      resultContainerProperty c "useCount" storageUseCountId storageUseCount storageUseCountChanged_,
+      resultContainerProperty c "usedContent" storageUsedContentId storageUsedContent storageUsedContentChanged_,
+      resultContainerProperty c "utilisationCount" storageUtilisationCountId storageUtilisationCount storageUtilisationCountChanged_,
+      resultContainerProperty c "utilisationCountStats" storageUtilisationCountStatsId storageUtilisationCountStats storageUtilisationCountChanged_ ] }
+
+-- | Return a summary by the specified storage.
+storageResultSummary :: MonadDES m
+                        => ResultContainer (Storage m) m
+                        -- ^ the storage container
+                        -> ResultSource m
+storageResultSummary c =
+  ResultObjectSource $
+  ResultObject {
+    resultObjectName = resultContainerName c,
+    resultObjectId = resultContainerId c,
+    resultObjectTypeId = storageId,
+    resultObjectSignal = resultContainerSignal c,
+    resultObjectSummary = storageResultSummary c,
+    resultObjectProperties = [
+      resultContainerConstProperty c "capacity" storageCapacityId storageCapacity,
+      resultContainerProperty c "queueCountStats" storageQueueCountStatsId storageQueueCountStats storageQueueCountChanged_,
+      resultContainerProperty c "waitTime" storageWaitTimeId storageWaitTime storageWaitTimeChanged_,
+      resultContainerIntegProperty c "averageHoldingTime" storageAverageHoldingTimeId storageAverageHoldingTime,
+      resultContainerProperty c "contentStats" storageContentStatsId storageContentStats storageContentChanged_,
+      resultContainerProperty c "useCount" storageUseCountId storageUseCount storageUseCountChanged_,
+      resultContainerProperty c "usedContent" storageUsedContentId storageUsedContent storageUsedContentChanged_,
+      resultContainerProperty c "utilisationCountStats" storageUtilisationCountStatsId storageUtilisationCountStats storageUtilisationCountChanged_ ] }
+
 instance MonadDES m => ResultProvider (Q.Queue m) m where
 
   resultSource' name i m =
@@ -123,3 +176,8 @@ instance MonadDES m => ResultProvider (Facility m a) m where
 
   resultSource' name i m =
     facilityResultSource $ ResultContainer name i m (ResultSignal $ facilityChanged_ m)
+
+instance MonadDES m => ResultProvider (Storage m) m where
+
+  resultSource' name i m =
+    storageResultSource $ ResultContainer name i m (ResultSignal $ storageChanged_ m)
