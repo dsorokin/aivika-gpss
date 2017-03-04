@@ -16,6 +16,9 @@ module Simulation.Aivika.GPSS.Transact
         transactArrivalTime,
         transactPriority,
         newTransact,
+        assignTransactValue,
+        assignTransactValueM,
+        assignTransactPriority,
         takeTransact,
         releaseTransact,
         transactPreemptionBegin,
@@ -225,3 +228,21 @@ unregisterTransactQueueEntry t q =
        Just e  ->
          do writeIORef (transactQueueEntryRef t) (HM.delete q m)
             return e
+
+-- | Assign the transact value and return a new version of the same transact.
+assignTransactValue :: Transact a -> (a -> b) -> Transact b
+assignTransactValue t f =
+  let b = f (transactValue t)
+  in t { transactValue = b }
+
+-- | Assign the transact value and return a new version of the same transact.
+assignTransactValueM :: Monad c => Transact a -> (a -> c b) -> c (Transact b)
+{-# INLINABLE assignTransactValue #-}
+assignTransactValueM t f =
+  do b <- f (transactValue t)
+     return t { transactValue = b }
+
+-- | Assign the priority and return a new version of the same transact.
+assignTransactPriority :: Transact a -> Int -> Transact a
+assignTransactPriority t priority =
+  t { transactPriority = priority }
