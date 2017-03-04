@@ -44,6 +44,7 @@ library
                      Simulation.Aivika.GPSS.Block.Generate
                      Simulation.Aivika.GPSS.Block.Leave
                      Simulation.Aivika.GPSS.Block.Preempt
+                     Simulation.Aivika.GPSS.Block.Priority
                      Simulation.Aivika.GPSS.Block.Queue
                      Simulation.Aivika.GPSS.Block.Release
                      Simulation.Aivika.GPSS.Block.Return
@@ -66,6 +67,7 @@ library
                      Simulation.Aivika.Trans.GPSS.Block.Generate
                      Simulation.Aivika.Trans.GPSS.Block.Leave
                      Simulation.Aivika.Trans.GPSS.Block.Preempt
+                     Simulation.Aivika.Trans.GPSS.Block.Priority
                      Simulation.Aivika.Trans.GPSS.Block.Queue
                      Simulation.Aivika.Trans.GPSS.Block.Release
                      Simulation.Aivika.Trans.GPSS.Block.Return
