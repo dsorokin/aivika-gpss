@@ -70,6 +70,7 @@ library
                      Simulation.Aivika.Trans.GPSS.Queue
                      Simulation.Aivika.Trans.GPSS.Results
                      Simulation.Aivika.Trans.GPSS.Results.Locale
+                     Simulation.Aivika.Trans.GPSS.Storage
                      Simulation.Aivika.Trans.GPSS.Transact
                      Simulation.Aivika.Trans.GPSS.TransactQueueStrategy
                      
