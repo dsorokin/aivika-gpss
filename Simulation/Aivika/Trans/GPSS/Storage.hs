@@ -312,7 +312,7 @@ enterStorage :: MonadDES m
                 -> Transact m a
                 -- ^ a transact that makes the request
                 -> Int
-                -- ^ the available content decrement
+                -- ^ the content decrement
                 -> Process m ()
 {-# INLINABLE enterStorage #-}
 enterStorage r transact decrement =

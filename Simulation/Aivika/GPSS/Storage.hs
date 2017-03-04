@@ -283,7 +283,7 @@ enterStorage :: Storage
                 -> Transact a
                 -- ^ a transact that makes the request
                 -> Int
-                -- ^ the available content decrement
+                -- ^ the content decrement
                 -> Process ()
 enterStorage r transact decrement =
   Process $ \pid ->
