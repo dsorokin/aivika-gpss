@@ -17,6 +17,7 @@ import Simulation.Aivika.Trans
 
 import qualified Simulation.Aivika.Trans.GPSS.Queue as Q
 import Simulation.Aivika.Trans.GPSS.Facility
+import Simulation.Aivika.Trans.GPSS.Storage
 
 -- | The queue identifier.
 queueId :: ResultId
@@ -193,3 +194,123 @@ facilityInterruptedId =
   M.fromList
   [(russianResultLocale, "удержание прибора сейчас прервано?"),
    (englishResultLocale, "is the facility interrupted now?")]
+
+-- | The storage identifier.
+storageId :: ResultId
+storageId =
+  LocalisedResultId $
+  M.fromList
+  [(russianResultLocale, "многоканальное устройство"),
+   (englishResultLocale, "the storage")]
+
+-- | Property 'storageCapacity'.
+storageCapacityId :: ResultId
+storageCapacityId =
+  LocalisedResultId $
+  M.fromList
+  [(russianResultLocale, "емкость многоканального устройства"),
+   (englishResultLocale, "the storage capacity")]
+
+-- | Property 'storageEmpty'.
+storageEmptyId :: ResultId
+storageEmptyId =
+  LocalisedResultId $
+  M.fromList
+  [(russianResultLocale, "не используется ли совсем устройство сейчас?"),
+   (englishResultLocale, "is the storage unused completely now?")]
+
+-- | Property 'storageFull'.
+storageFullId :: ResultId
+storageFullId =
+  LocalisedResultId $
+  M.fromList
+  [(russianResultLocale, "используется ли устройство полностью сейчас?"),
+   (englishResultLocale, "is the storage used completely now?")]
+
+-- | Property 'storageContent'.
+storageContentId :: ResultId
+storageContentId =
+  LocalisedResultId $
+  M.fromList
+  [(russianResultLocale, "доступное содержимое устройства"),
+   (englishResultLocale, "the current available content")]
+
+-- | Property 'storageContentStats'.
+storageContentStatsId :: ResultId
+storageContentStatsId =
+  LocalisedResultId $
+  M.fromList
+  [(russianResultLocale, "статистика доступного содержимого устройства"),
+   (englishResultLocale, "the available content statistics")]
+
+-- | Property 'storageUseCount'.
+storageUseCountId :: ResultId
+storageUseCountId =
+  LocalisedResultId $
+  M.fromList
+  [(russianResultLocale, "общее количество использований устройства"),
+   (englishResultLocale, "the total use count")]
+
+-- | Property 'storageUsedContent'.
+storageUsedContentId :: ResultId
+storageUsedContentId =
+  LocalisedResultId $
+  M.fromList
+  [(russianResultLocale, "общее использованное количество устройства"),
+   (englishResultLocale, "the total used content")]
+
+-- | Property 'storageUtilisationCount'.
+storageUtilisationCountId :: ResultId
+storageUtilisationCountId =
+  LocalisedResultId $
+  M.fromList
+  [(russianResultLocale, "текущее используемое количество устройства"),
+   (englishResultLocale, "the current utilisation count")]
+
+-- | Property 'storageUtilisationCountStats'.
+storageUtilisationCountStatsId :: ResultId
+storageUtilisationCountStatsId =
+  LocalisedResultId $
+  M.fromList
+  [(russianResultLocale, "статистка по используемому количеству устройства"),
+   (englishResultLocale, "the utilisation count statistics")]
+
+-- | Property 'storageQueueCount'.
+storageQueueCountId :: ResultId
+storageQueueCountId =
+  LocalisedResultId $
+  M.fromList
+  [(russianResultLocale, "текущая длина очереди к устройству"),
+   (englishResultLocale, "the current queue size")]
+
+-- | Property 'storageQueueCountStats'.
+storageQueueCountStatsId :: ResultId
+storageQueueCountStatsId =
+  LocalisedResultId $
+  M.fromList
+  [(russianResultLocale, "статистика длины очереди к устройству"),
+   (englishResultLocale, "the queue size statistics")]
+
+-- | Property 'storageTotalWaitTime'.
+storageTotalWaitTimeId :: ResultId
+storageTotalWaitTimeId =
+  LocalisedResultId $
+  M.fromList
+  [(russianResultLocale, "общее время ожидания устройства"),
+   (englishResultLocale, "the total wait time")]
+
+-- | Property 'storageWaitTime'.
+storageWaitTimeId :: ResultId
+storageWaitTimeId =
+  LocalisedResultId $
+  M.fromList
+  [(russianResultLocale, "время ожидания устройства"),
+   (englishResultLocale, "the wait time")]
+
+-- | Property 'storageAverageHoldingTime'.
+storageAverageHoldingTimeId :: ResultId
+storageAverageHoldingTimeId =
+  LocalisedResultId $
+  M.fromList
+  [(russianResultLocale, "среднее время удержания устройства на единицу устройства"),
+   (englishResultLocale, "the average holding time per unit")]
