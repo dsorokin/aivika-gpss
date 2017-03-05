@@ -27,6 +27,7 @@ module Simulation.Aivika.GPSS
         module Simulation.Aivika.GPSS.Block.Seize,
         module Simulation.Aivika.GPSS.Block.Terminate,
         module Simulation.Aivika.GPSS.Block.Transfer,
+        module Simulation.Aivika.GPSS.Block.Unlink,
         module Simulation.Aivika.GPSS.Facility,
         module Simulation.Aivika.GPSS.Results,
         module Simulation.Aivika.GPSS.Storage,
@@ -49,6 +50,7 @@ import Simulation.Aivika.GPSS.Block.Return
 import Simulation.Aivika.GPSS.Block.Seize
 import Simulation.Aivika.GPSS.Block.Terminate
 import Simulation.Aivika.GPSS.Block.Transfer
+import Simulation.Aivika.GPSS.Block.Unlink
 import Simulation.Aivika.GPSS.Facility
 import Simulation.Aivika.GPSS.Results
 import Simulation.Aivika.GPSS.Storage
