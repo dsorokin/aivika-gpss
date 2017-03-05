@@ -25,6 +25,7 @@ module Simulation.Aivika.GPSS.Transact
         transactPreemptionEnd,
         requireTransactProcessId,
         transferTransact,
+        reactivateTransacts,
         registerTransactQueueEntry,
         unregisterTransactQueueEntry) where
 
@@ -246,3 +247,14 @@ assignTransactValueM t f =
 assignTransactPriority :: Transact a -> Int -> Transact a
 assignTransactPriority t priority =
   t { transactPriority = priority }
+
+-- | Reactivate the transacts or transfer them to the specified computations.
+reactivateTransacts :: [(Transact a, Maybe (Process ()))] -> Event ()
+reactivateTransacts [] = return ()
+reactivateTransacts ((t, Nothing): xs) =
+  do pid <- requireTransactProcessId t
+     reactivateProcess pid
+     reactivateTransacts xs
+reactivateTransacts ((t, Just transfer): xs) =
+  do transferTransact t transfer
+     reactivateTransacts xs
