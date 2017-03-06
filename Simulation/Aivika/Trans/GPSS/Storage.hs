@@ -33,6 +33,8 @@ module Simulation.Aivika.Trans.GPSS.Storage
         enterStorage,
         leaveStorage,
         leaveStorageWithinEvent,
+        -- * Statistics Reset
+        resetStorage,
         -- * Signals
         storageContentChanged,
         storageContentChanged_,
@@ -495,5 +497,34 @@ updateStorageWaitTime r delta =
      invokeEvent p $
        modifyRef (storageWaitTimeRef r) $
        addSamplingStats delta
+     invokeEvent p $
+       triggerSignal (storageWaitTimeSource r) ()
+
+-- | Reset the statistics.
+resetStorage :: MonadDES m => Storage m -> Event m ()
+{-# INLINABLE resetStorage #-}
+resetStorage r =
+  Event $ \p ->
+  do let t = pointTime p
+     content <- invokeEvent p $ readRef (storageContentRef r)
+     invokeEvent p $ writeRef (storageContentStatsRef r) $
+       returnTimingStats t content
+     invokeEvent p $ writeRef (storageUseCountRef r) 0
+     let usedContent = storageCapacity r - content
+     invokeEvent p $ writeRef (storageUsedContentRef r) usedContent
+     utilCount <- invokeEvent p $ readRef (storageUtilisationCountRef r)
+     invokeEvent p $ writeRef (storageUtilisationCountStatsRef r) $
+       returnTimingStats t utilCount
+     queueCount <- invokeEvent p $ readRef (storageQueueCountRef r)
+     invokeEvent p $ writeRef (storageQueueCountStatsRef r) $
+       returnTimingStats t queueCount
+     invokeEvent p $ writeRef (storageTotalWaitTimeRef r) 0
+     invokeEvent p $ writeRef (storageWaitTimeRef r) emptySamplingStats
+     invokeEvent p $
+       triggerSignal (storageUseCountSource r) 0
+     invokeEvent p $
+       triggerSignal (storageUsedContentSource r) usedContent
+     invokeEvent p $
+       triggerSignal (storageUtilisationCountSource r) utilCount
      invokeEvent p $
        triggerSignal (storageWaitTimeSource r) ()

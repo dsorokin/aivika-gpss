@@ -33,6 +33,8 @@ module Simulation.Aivika.GPSS.Storage
         enterStorage,
         leaveStorage,
         leaveStorageWithinEvent,
+        -- * Statistics Reset
+        resetStorage,
         -- * Signals
         storageContentChanged,
         storageContentChanged_,
@@ -442,5 +444,33 @@ updateStorageWaitTime r delta =
      a' `seq` writeIORef (storageTotalWaitTimeRef r) a'
      modifyIORef' (storageWaitTimeRef r) $
        addSamplingStats delta
+     invokeEvent p $
+       triggerSignal (storageWaitTimeSource r) ()
+
+-- | Reset the statistics.
+resetStorage :: Storage -> Event ()
+resetStorage r =
+  Event $ \p ->
+  do let t = pointTime p
+     content <- readIORef (storageContentRef r)
+     writeIORef (storageContentStatsRef r) $
+       returnTimingStats t content
+     writeIORef (storageUseCountRef r) 0
+     let usedContent = storageCapacity r - content
+     writeIORef (storageUsedContentRef r) usedContent
+     utilCount <- readIORef (storageUtilisationCountRef r)
+     writeIORef (storageUtilisationCountStatsRef r) $
+       returnTimingStats t utilCount
+     queueCount <- readIORef (storageQueueCountRef r)
+     writeIORef (storageQueueCountStatsRef r) $
+       returnTimingStats t queueCount
+     writeIORef (storageTotalWaitTimeRef r) 0
+     writeIORef (storageWaitTimeRef r) emptySamplingStats
+     invokeEvent p $
+       triggerSignal (storageUseCountSource r) 0
+     invokeEvent p $
+       triggerSignal (storageUsedContentSource r) usedContent
+     invokeEvent p $
+       triggerSignal (storageUtilisationCountSource r) utilCount
      invokeEvent p $
        triggerSignal (storageWaitTimeSource r) ()
