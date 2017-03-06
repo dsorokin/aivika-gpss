@@ -34,6 +34,8 @@ module Simulation.Aivika.Trans.GPSS.Facility
         releaseFacility,
         preemptFacility,
         returnFacility,
+        -- * Statistics Reset
+        resetFacility,
         -- * Signals
         facilityCountChanged,
         facilityCountChanged_,
@@ -670,5 +672,34 @@ updateFacilityHoldingTime r delta =
      invokeEvent p $
        modifyRef (facilityHoldingTimeRef r) $
        addSamplingStats delta
+     invokeEvent p $
+       triggerSignal (facilityHoldingTimeSource r) ()
+
+-- | Reset the statistics.
+resetFacility :: MonadDES m => Facility m a -> Event m ()
+{-# INLINABLE resetFacility #-}
+resetFacility r =
+  Event $ \p ->
+  do let t = pointTime p
+     count <- invokeEvent p $ readRef (facilityCountRef r)
+     invokeEvent p $ writeRef (facilityCountStatsRef r) $
+       returnTimingStats t count
+     invokeEvent p $ writeRef (facilityCaptureCountRef r) 0
+     utilisationCount <- invokeEvent p $ readRef (facilityUtilisationCountRef r)
+     invokeEvent p $ writeRef (facilityUtilisationCountStatsRef r) $
+       returnTimingStats t utilisationCount
+     queueCount <- invokeEvent p $ readRef (facilityQueueCountRef r)
+     invokeEvent p $ writeRef (facilityQueueCountStatsRef r) $
+       returnTimingStats t queueCount
+     invokeEvent p $ writeRef (facilityTotalWaitTimeRef r) 0
+     invokeEvent p $ writeRef (facilityWaitTimeRef r) emptySamplingStats
+     invokeEvent p $ writeRef (facilityTotalHoldingTimeRef r) 0
+     invokeEvent p $ writeRef (facilityHoldingTimeRef r) emptySamplingStats
+     invokeEvent p $
+       triggerSignal (facilityCaptureCountSource r) 0
+     invokeEvent p $
+       triggerSignal (facilityUtilisationCountSource r) 0
+     invokeEvent p $
+       triggerSignal (facilityWaitTimeSource r) ()
      invokeEvent p $
        triggerSignal (facilityHoldingTimeSource r) ()

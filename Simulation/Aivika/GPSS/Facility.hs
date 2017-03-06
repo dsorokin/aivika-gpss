@@ -34,6 +34,8 @@ module Simulation.Aivika.GPSS.Facility
         releaseFacility,
         preemptFacility,
         returnFacility,
+        -- * Statistics Reset
+        resetFacility,
         -- * Signals
         facilityCountChanged,
         facilityCountChanged_,
@@ -616,5 +618,33 @@ updateFacilityHoldingTime r delta =
      a' `seq` writeIORef (facilityTotalHoldingTimeRef r) a'
      modifyIORef' (facilityHoldingTimeRef r) $
        addSamplingStats delta
+     invokeEvent p $
+       triggerSignal (facilityHoldingTimeSource r) ()
+
+-- | Reset the statistics.
+resetFacility :: Facility a -> Event ()
+resetFacility r =
+  Event $ \p ->
+  do let t = pointTime p
+     count <- readIORef (facilityCountRef r)
+     writeIORef (facilityCountStatsRef r) $
+       returnTimingStats t count
+     writeIORef (facilityCaptureCountRef r) 0
+     utilisationCount <- readIORef (facilityUtilisationCountRef r)
+     writeIORef (facilityUtilisationCountStatsRef r) $
+       returnTimingStats t utilisationCount
+     queueCount <- readIORef (facilityQueueCountRef r)
+     writeIORef (facilityQueueCountStatsRef r) $
+       returnTimingStats t queueCount
+     writeIORef (facilityTotalWaitTimeRef r) 0
+     writeIORef (facilityWaitTimeRef r) emptySamplingStats
+     writeIORef (facilityTotalHoldingTimeRef r) 0
+     writeIORef (facilityHoldingTimeRef r) emptySamplingStats
+     invokeEvent p $
+       triggerSignal (facilityCaptureCountSource r) 0
+     invokeEvent p $
+       triggerSignal (facilityUtilisationCountSource r) 0
+     invokeEvent p $
+       triggerSignal (facilityWaitTimeSource r) ()
      invokeEvent p $
        triggerSignal (facilityHoldingTimeSource r) ()
