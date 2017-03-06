@@ -16,6 +16,7 @@ module Simulation.Aivika.GPSS.Transact
         transactArrivalTime,
         transactPriority,
         newTransact,
+        splitTransact,
         assignTransactValue,
         assignTransactValueM,
         assignTransactPriority,
@@ -84,6 +85,24 @@ newTransact a priority =
                        transactArrivalDelay = arrivalDelay a,
                        transactArrivalTime = arrivalTime a,
                        transactPriority = priority,
+                       transactPreemptionCountRef = r0,
+                       transactProcessIdRef = r1,
+                       transactProcessContRef = r2,
+                       transactQueueEntryRef = r3
+                     }
+
+-- | Split the transact.
+splitTransact :: Transact a -> Simulation (Transact a)
+splitTransact t =
+  Simulation $ \r ->
+  do r0 <- newIORef 0
+     r1 <- newIORef Nothing
+     r2 <- newIORef Nothing
+     r3 <- newIORef HM.empty
+     return Transact { transactValue = transactValue t,
+                       transactArrivalDelay = transactArrivalDelay t,
+                       transactArrivalTime = transactArrivalTime t,
+                       transactPriority = transactPriority t,
                        transactPreemptionCountRef = r0,
                        transactProcessIdRef = r1,
                        transactProcessContRef = r2,
