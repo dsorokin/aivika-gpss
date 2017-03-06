@@ -223,8 +223,11 @@ transferTransact :: MonadDES m => Transact m a -> Process m () -> Event m ()
 {-# INLINABLE transferTransact #-}
 transferTransact t transfer =
   Event $ \p ->
-  do pid <- invokeEvent p $ requireTransactProcessId t
-     invokeEvent p $ cancelProcessWithId pid
+  do a <- invokeEvent p $ readRef (transactProcessIdRef t)
+     case a of
+       Nothing  -> return ()
+       Just pid ->
+         invokeEvent p $ cancelProcessWithId pid
      invokeEvent p $ writeRef (transactProcessIdRef t) Nothing
      invokeEvent p $ writeRef (transactProcessContRef t) Nothing
      invokeEvent p $

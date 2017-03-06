@@ -212,8 +212,11 @@ requireTransactProcessId t =
 transferTransact :: Transact a -> Process () -> Event ()
 transferTransact t transfer =
   Event $ \p ->
-  do pid <- invokeEvent p $ requireTransactProcessId t
-     invokeEvent p $ cancelProcessWithId pid
+  do a <- readIORef (transactProcessIdRef t)
+     case a of
+       Nothing  -> return ()
+       Just pid ->
+         invokeEvent p $ cancelProcessWithId pid
      writeIORef (transactProcessIdRef t) Nothing
      writeIORef (transactProcessContRef t) Nothing
      invokeEvent p $
