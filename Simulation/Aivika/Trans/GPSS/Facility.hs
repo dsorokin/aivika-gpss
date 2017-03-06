@@ -685,9 +685,9 @@ resetFacility r =
      invokeEvent p $ writeRef (facilityCountStatsRef r) $
        returnTimingStats t count
      invokeEvent p $ writeRef (facilityCaptureCountRef r) 0
-     utilisationCount <- invokeEvent p $ readRef (facilityUtilisationCountRef r)
+     utilCount <- invokeEvent p $ readRef (facilityUtilisationCountRef r)
      invokeEvent p $ writeRef (facilityUtilisationCountStatsRef r) $
-       returnTimingStats t utilisationCount
+       returnTimingStats t utilCount
      queueCount <- invokeEvent p $ readRef (facilityQueueCountRef r)
      invokeEvent p $ writeRef (facilityQueueCountStatsRef r) $
        returnTimingStats t queueCount
@@ -697,8 +697,6 @@ resetFacility r =
      invokeEvent p $ writeRef (facilityHoldingTimeRef r) emptySamplingStats
      invokeEvent p $
        triggerSignal (facilityCaptureCountSource r) 0
-     invokeEvent p $
-       triggerSignal (facilityUtilisationCountSource r) 0
      invokeEvent p $
        triggerSignal (facilityWaitTimeSource r) ()
      invokeEvent p $
