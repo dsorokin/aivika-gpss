@@ -27,6 +27,8 @@ module Simulation.Aivika.GPSS.Queue
         -- * Dequeuing and Enqueuing
         enqueue,
         dequeue,
+        -- * Statistics Reset
+        resetQueue,
         -- * Derived Signals for Properties
         queueNullChanged,
         queueNullChanged_,
@@ -320,3 +322,15 @@ queueChanged_ :: Queue -> Signal ()
 queueChanged_ q =
   mapSignal (const ()) (enqueued q) <>
   mapSignal (const ()) (dequeued q)
+
+-- | Reset the statistics.
+resetQueue :: Queue -> Event () 
+resetQueue q =
+  do t  <- liftDynamics time
+     content <- liftIO $ readIORef (queueContentRef q)
+     liftIO $ writeIORef (queueContentStatsRef q) $
+       returnTimingStats t content
+     liftIO $ writeIORef (enqueueCountRef q) 0
+     liftIO $ writeIORef (enqueueZeroEntryCountRef q) 0
+     liftIO $ writeIORef (queueWaitTimeRef q) mempty
+     liftIO $ writeIORef (queueNonZeroEntryWaitTimeRef q) mempty

@@ -29,6 +29,8 @@ module Simulation.Aivika.Trans.GPSS.Queue
         -- * Dequeuing and Enqueuing
         enqueue,
         dequeue,
+        -- * Statistics Reset
+        resetQueue,
         -- * Derived Signals for Properties
         queueNullChanged,
         queueNullChanged_,
@@ -360,3 +362,16 @@ queueChanged_ :: MonadDES m => Queue m -> Signal m ()
 queueChanged_ q =
   mapSignal (const ()) (enqueued q) <>
   mapSignal (const ()) (dequeued q)
+
+-- | Reset the statistics.
+resetQueue :: MonadDES m => Queue m -> Event m ()
+{-# INLINABLE resetQueue #-}
+resetQueue q =
+  do t  <- liftDynamics time
+     content <- readRef (queueContentRef q)
+     writeRef (queueContentStatsRef q) $
+       returnTimingStats t content
+     writeRef (enqueueCountRef q) 0
+     writeRef (enqueueZeroEntryCountRef q) 0
+     writeRef (queueWaitTimeRef q) mempty
+     writeRef (queueNonZeroEntryWaitTimeRef q) mempty
