@@ -25,6 +25,7 @@ module Simulation.Aivika.Trans.GPSS
         module Simulation.Aivika.Trans.GPSS.Block.Release,
         module Simulation.Aivika.Trans.GPSS.Block.Return,
         module Simulation.Aivika.Trans.GPSS.Block.Seize,
+        module Simulation.Aivika.Trans.GPSS.Block.Split,
         module Simulation.Aivika.Trans.GPSS.Block.Terminate,
         module Simulation.Aivika.Trans.GPSS.Block.Transfer,
         module Simulation.Aivika.Trans.GPSS.Block.Unlink,
@@ -48,6 +49,7 @@ import Simulation.Aivika.Trans.GPSS.Block.Queue
 import Simulation.Aivika.Trans.GPSS.Block.Release
 import Simulation.Aivika.Trans.GPSS.Block.Return
 import Simulation.Aivika.Trans.GPSS.Block.Seize
+import Simulation.Aivika.Trans.GPSS.Block.Split
 import Simulation.Aivika.Trans.GPSS.Block.Terminate
 import Simulation.Aivika.Trans.GPSS.Block.Transfer
 import Simulation.Aivika.Trans.GPSS.Block.Unlink
