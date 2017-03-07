@@ -92,11 +92,12 @@ assembleTransact t n =
                          passivateProcess
        else do let a' = a - 1
                if a' == 0
-                 then liftEvent $
-                      do Just pid <- liftIO $ readIORef (assemblySetAssemblingTransact s)
-                         liftIO $ writeIORef (assemblySetAssemblingTransact s) Nothing
-                         liftIO $ writeIORef (assemblySetAssemblingCounter s) $! a'
-                         reactivateProcess pid
+                 then do liftEvent $
+                           do Just pid <- liftIO $ readIORef (assemblySetAssemblingTransact s)
+                              liftIO $ writeIORef (assemblySetAssemblingTransact s) Nothing
+                              liftIO $ writeIORef (assemblySetAssemblingCounter s) $! a'
+                              reactivateProcess pid
+                         cancelProcess
                  else do liftIO $ writeIORef (assemblySetAssemblingCounter s) $! a'
                          cancelProcess
 
