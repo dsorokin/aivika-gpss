@@ -98,7 +98,7 @@ instance MonadDES m => Hashable (Queue m) where
   hashWithSalt salt x = hashWithSalt salt (queueSequenceNo x)
 
 -- | Create a new queue.
-newQueue :: (MonadDES m, MonadIO (Event m)) => Event m (Queue m)
+newQueue :: MonadDES m => Event m (Queue m)
 {-# INLINABLE newQueue #-}
 newQueue =
   do t  <- liftDynamics time
