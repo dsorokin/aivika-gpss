@@ -15,6 +15,7 @@ module Simulation.Aivika.GPSS.Transact
         transactArrivalDelay,
         transactArrivalTime,
         transactPriority,
+        transactAssemblySet,
         newTransact,
         splitTransact,
         assignTransactValue,
@@ -45,6 +46,7 @@ import Simulation.Aivika.Internal.Cont
 import Simulation.Aivika.Internal.Process
 
 import {-# SOURCE #-} Simulation.Aivika.GPSS.Queue
+import {-# SOURCE #-} Simulation.Aivika.GPSS.AssemblySet
 
 -- | Represents a GPSS transact.
 data Transact a =
@@ -56,6 +58,8 @@ data Transact a =
              -- ^ The time at which the transact was generated.
              transactPriority :: Int,
              -- ^ The transact priority.
+             transactAssemblySetRef :: IORef (Maybe AssemblySet),
+             -- ^ The assembly set.
              transactPreemptionCountRef :: IORef Int,
              -- ^ How many times the transact is preempted.
              transactProcessIdRef :: IORef (Maybe ProcessId),
@@ -81,10 +85,12 @@ newTransact a priority =
      r1 <- newIORef Nothing
      r2 <- newIORef Nothing
      r3 <- newIORef HM.empty
+     r4 <- newIORef Nothing
      return Transact { transactValue = arrivalValue a,
                        transactArrivalDelay = arrivalDelay a,
                        transactArrivalTime = arrivalTime a,
                        transactPriority = priority,
+                       transactAssemblySetRef = r4,
                        transactPreemptionCountRef = r0,
                        transactProcessIdRef = r1,
                        transactProcessContRef = r2,
@@ -103,11 +109,25 @@ splitTransact t =
                        transactArrivalDelay = transactArrivalDelay t,
                        transactArrivalTime = transactArrivalTime t,
                        transactPriority = transactPriority t,
+                       transactAssemblySetRef = transactAssemblySetRef t,
                        transactPreemptionCountRef = r0,
                        transactProcessIdRef = r1,
                        transactProcessContRef = r2,
                        transactQueueEntryRef = r3
                      }
+
+-- | Return the transact assembly set.
+transactAssemblySet :: Transact a -> Event AssemblySet
+transactAssemblySet t =
+  Event $ \p ->
+  do let r = pointRun p
+     x <- readIORef (transactAssemblySetRef t)
+     case x of
+       Just a  -> return a
+       Nothing ->
+         do a <- invokeSimulation r newAssemblySet
+            writeIORef (transactAssemblySetRef t) (Just a)
+            return a
 
 -- | Take the transact.
 takeTransact :: Transact a -> Process ()

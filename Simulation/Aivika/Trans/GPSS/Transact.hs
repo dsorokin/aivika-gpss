@@ -15,6 +15,7 @@ module Simulation.Aivika.Trans.GPSS.Transact
         transactArrivalDelay,
         transactArrivalTime,
         transactPriority,
+        transactAssemblySet,
         newTransact,
         splitTransact,
         assignTransactValue,
@@ -44,6 +45,7 @@ import Simulation.Aivika.Trans.Internal.Cont
 import Simulation.Aivika.Trans.Internal.Process
 
 import {-# SOURCE #-} Simulation.Aivika.Trans.GPSS.Queue
+import {-# SOURCE #-} Simulation.Aivika.Trans.GPSS.AssemblySet
 
 -- | Represents a GPSS transact.
 data Transact m a =
@@ -55,6 +57,8 @@ data Transact m a =
              -- ^ The time at which the transact was generated.
              transactPriority :: Int,
              -- ^ The transact priority.
+             transactAssemblySetRef :: Ref m (Maybe (AssemblySet m)),
+             -- ^ The assembly set.
              transactPreemptionCountRef :: Ref m Int,
              -- ^ How many times the transact is preempted.
              transactProcessIdRef :: Ref m (Maybe (ProcessId m)),
@@ -84,10 +88,12 @@ newTransact a priority =
      r1 <- invokeSimulation r $ newRef Nothing
      r2 <- invokeSimulation r $ newRef Nothing
      r3 <- invokeSimulation r $ newRef HM.empty
+     r4 <- invokeSimulation r $ newRef Nothing
      return Transact { transactValue = arrivalValue a,
                        transactArrivalDelay = arrivalDelay a,
                        transactArrivalTime = arrivalTime a,
                        transactPriority = priority,
+                       transactAssemblySetRef = r4,
                        transactPreemptionCountRef = r0,
                        transactProcessIdRef = r1,
                        transactProcessContRef = r2,
@@ -107,11 +113,26 @@ splitTransact t =
                        transactArrivalDelay = transactArrivalDelay t,
                        transactArrivalTime = transactArrivalTime t,
                        transactPriority = transactPriority t,
+                       transactAssemblySetRef = transactAssemblySetRef t,
                        transactPreemptionCountRef = r0,
                        transactProcessIdRef = r1,
                        transactProcessContRef = r2,
                        transactQueueEntryRef = r3
                      }
+
+-- | Return the transact assembly set.
+transactAssemblySet :: MonadDES m => Transact m a -> Event m (AssemblySet m)
+{-# INLINABLE transactAssemblySet #-}
+transactAssemblySet t =
+  Event $ \p ->
+  do let r = pointRun p
+     x <- invokeEvent p $ readRef (transactAssemblySetRef t)
+     case x of
+       Just a  -> return a
+       Nothing ->
+         do a <- invokeSimulation r newAssemblySet
+            invokeEvent p $ writeRef (transactAssemblySetRef t) (Just a)
+            return a
 
 -- | Take the transact.
 takeTransact :: MonadDES m => Transact m a -> Process m ()
