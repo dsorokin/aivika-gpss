@@ -18,12 +18,10 @@ module Simulation.Aivika.Trans.GPSS.Queue
 
 import Data.Hashable
 
-import System.Mem.StableName
-
 import Simulation.Aivika.Trans
 
 data Queue m =
-  Queue { queueStableName :: StableName (Ref m Int),
+  Queue { queueSequenceNo :: Int,
           queueContentRef :: Ref m Int,
           queueContentStatsRef :: Ref m (TimingStats Int),
           enqueueCountRef :: Ref m Int,

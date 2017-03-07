@@ -58,8 +58,7 @@ import Data.Hashable
 import Control.Monad
 import Control.Monad.Trans
 
-import System.Mem.StableName
-
+import Simulation.Aivika
 import Simulation.Aivika.Internal.Specs
 import Simulation.Aivika.Internal.Simulation
 import Simulation.Aivika.Internal.Dynamics
@@ -72,7 +71,7 @@ import Simulation.Aivika.GPSS.Transact
 
 -- | Represents the queue entity.
 data Queue =
-  Queue { queueStableName :: StableName (IORef Int),
+  Queue { queueSequenceNo :: Int,
           queueContentRef :: IORef Int,
           queueContentStatsRef :: IORef (TimingStats Int),
           enqueueCountRef :: IORef Int,
@@ -95,12 +94,14 @@ instance Eq Queue where
   x == y = (queueContentRef x) == (queueContentRef y)
 
 instance Hashable Queue where
-  hashWithSalt salt x = hashWithSalt salt (queueStableName x)
+  hashWithSalt salt x = hashWithSalt salt (queueSequenceNo x)
 
 -- | Create a new queue.
 newQueue :: Event Queue  
 newQueue =
   do t  <- liftDynamics time
+     g  <- liftParameter generatorParameter
+     no <- liftIO $ generateSequenceNo g
      i  <- liftIO $ newIORef 0
      is <- liftIO $ newIORef $ returnTimingStats t 0
      e  <- liftIO $ newIORef 0
@@ -109,8 +110,7 @@ newQueue =
      w2 <- liftIO $ newIORef mempty
      s1 <- liftSimulation $ newSignalSource
      s2 <- liftSimulation $ newSignalSource
-     sn <- liftIO $ makeStableName i
-     return Queue { queueStableName = sn,
+     return Queue { queueSequenceNo = no,
                     queueContentRef = i,
                     queueContentStatsRef = is,
                     enqueueCountRef = e,
