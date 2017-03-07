@@ -33,6 +33,7 @@ module Simulation.Aivika.GPSS
         module Simulation.Aivika.GPSS.Block.Unlink,
         module Simulation.Aivika.GPSS.AssemblySet,
         module Simulation.Aivika.GPSS.Facility,
+        module Simulation.Aivika.GPSS.MatchChain,
         module Simulation.Aivika.GPSS.Results,
         module Simulation.Aivika.GPSS.Storage,
         module Simulation.Aivika.GPSS.Transact,
@@ -60,6 +61,7 @@ import Simulation.Aivika.GPSS.Block.Transfer
 import Simulation.Aivika.GPSS.Block.Unlink
 import Simulation.Aivika.GPSS.AssemblySet
 import Simulation.Aivika.GPSS.Facility
+import Simulation.Aivika.GPSS.MatchChain
 import Simulation.Aivika.GPSS.Results
 import Simulation.Aivika.GPSS.Storage
 import Simulation.Aivika.GPSS.Transact
