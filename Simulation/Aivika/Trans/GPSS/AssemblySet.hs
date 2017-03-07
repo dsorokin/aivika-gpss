@@ -82,11 +82,17 @@ assembleTransact t n =
           return (s, a)
      if a == 0
        then do let n' = n - 1
-               liftEvent $
-                 do pid <- requireTransactProcessId t
-                    writeRef (assemblySetAssemblingTransact s) (Just pid)
-                    writeRef (assemblySetAssemblingCounter s) $! n'
-               passivateProcess
+               when (n' < 0) $
+                 throwProcess $
+                 SimulationRetry
+                 "The number of transacts must be positive: assembleTransact"
+               if n' == 0
+                 then return ()
+                 else do liftEvent $
+                           do pid <- requireTransactProcessId t
+                              writeRef (assemblySetAssemblingTransact s) (Just pid)
+                              writeRef (assemblySetAssemblingCounter s) $! n'
+                         passivateProcess
        else do let a' = a - 1
                if a' == 0
                  then liftEvent $
@@ -108,14 +114,20 @@ gatherTransacts t n =
           return (s, a)
      if a == 0
        then do let n' = n - 1
-               liftEvent $
-                 do pid <- requireTransactProcessId t
-                    strategyEnqueueWithPriority
-                      (assemblySetGatheringTransacts s)
-                      (transactPriority t)
-                      pid
-                    writeRef (assemblySetGatheringCounter s) $! n'
-               passivateProcess
+               when (n' < 0) $
+                 throwProcess $
+                 SimulationRetry
+                 "The number of transacts must be positive: gatherTransacts"
+               if n' == 0
+                 then return ()
+                 else do liftEvent $
+                           do pid <- requireTransactProcessId t
+                              strategyEnqueueWithPriority
+                                (assemblySetGatheringTransacts s)
+                                (transactPriority t)
+                                pid
+                              writeRef (assemblySetGatheringCounter s) $! n'
+                         passivateProcess
        else do let a' = a - 1
                if a' == 0
                  then liftEvent $
