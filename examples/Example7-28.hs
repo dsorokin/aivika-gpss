@@ -42,7 +42,7 @@ model =
      let bottleStream = takeStream 1 $
                         randomUniformStream 0 0
 
-     let bottles     = streamGeneratorBlock bottleStream 1
+     let bottles     = streamGeneratorBlock bottleStream 0
          bottleChain =
            Block (\a ->
                    do t <- liftDynamics time
