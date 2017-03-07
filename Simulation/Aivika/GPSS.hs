@@ -13,6 +13,7 @@ module Simulation.Aivika.GPSS
        (-- * Modules
         module Simulation.Aivika.GPSS.Block,
         module Simulation.Aivika.GPSS.Block.Advance,
+        module Simulation.Aivika.GPSS.Block.Assemble,
         module Simulation.Aivika.GPSS.Block.Assign,
         module Simulation.Aivika.GPSS.Block.Depart,
         module Simulation.Aivika.GPSS.Block.Enter,
@@ -38,6 +39,7 @@ module Simulation.Aivika.GPSS
 
 import Simulation.Aivika.GPSS.Block
 import Simulation.Aivika.GPSS.Block.Advance
+import Simulation.Aivika.GPSS.Block.Assemble
 import Simulation.Aivika.GPSS.Block.Assign
 import Simulation.Aivika.GPSS.Block.Depart
 import Simulation.Aivika.GPSS.Block.Enter

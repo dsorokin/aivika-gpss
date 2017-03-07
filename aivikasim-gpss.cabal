@@ -38,6 +38,7 @@ library
     exposed-modules: Simulation.Aivika.GPSS
                      Simulation.Aivika.GPSS.Block
                      Simulation.Aivika.GPSS.Block.Advance
+                     Simulation.Aivika.GPSS.Block.Assemble
                      Simulation.Aivika.GPSS.Block.Assign
                      Simulation.Aivika.GPSS.Block.Depart
                      Simulation.Aivika.GPSS.Block.Enter
@@ -64,8 +65,9 @@ library
                      Simulation.Aivika.GPSS.TransactQueueStrategy
                      Simulation.Aivika.Trans.GPSS
                      Simulation.Aivika.Trans.GPSS.Block
-                     Simulation.Aivika.Trans.GPSS.Block.Assign
                      Simulation.Aivika.Trans.GPSS.Block.Advance
+                     Simulation.Aivika.Trans.GPSS.Block.Assemble
+                     Simulation.Aivika.Trans.GPSS.Block.Assign
                      Simulation.Aivika.Trans.GPSS.Block.Depart
                      Simulation.Aivika.Trans.GPSS.Block.Enter
                      Simulation.Aivika.Trans.GPSS.Block.Generate
