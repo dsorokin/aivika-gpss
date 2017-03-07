@@ -42,6 +42,7 @@ library
                      Simulation.Aivika.GPSS.Block.Assign
                      Simulation.Aivika.GPSS.Block.Depart
                      Simulation.Aivika.GPSS.Block.Enter
+                     Simulation.Aivika.GPSS.Block.Gather
                      Simulation.Aivika.GPSS.Block.Generate
                      Simulation.Aivika.GPSS.Block.Leave
                      Simulation.Aivika.GPSS.Block.Link
@@ -70,6 +71,7 @@ library
                      Simulation.Aivika.Trans.GPSS.Block.Assign
                      Simulation.Aivika.Trans.GPSS.Block.Depart
                      Simulation.Aivika.Trans.GPSS.Block.Enter
+                     Simulation.Aivika.Trans.GPSS.Block.Gather
                      Simulation.Aivika.Trans.GPSS.Block.Generate
                      Simulation.Aivika.Trans.GPSS.Block.Leave
                      Simulation.Aivika.Trans.GPSS.Block.Link
