@@ -96,7 +96,7 @@ assembleTransact t n =
                            do Just pid <- liftIO $ readIORef (assemblySetAssemblingTransact s)
                               liftIO $ writeIORef (assemblySetAssemblingTransact s) Nothing
                               liftIO $ writeIORef (assemblySetAssemblingCounter s) $! a'
-                              reactivateProcess pid
+                              reactivateProcessImmediately pid
                          cancelProcess
                  else do liftIO $ writeIORef (assemblySetAssemblingCounter s) $! a'
                          cancelProcess
@@ -126,6 +126,13 @@ gatherTransacts t n =
                               liftIO $ writeIORef (assemblySetGatheringCounter s) $! n'
                          passivateProcess
        else do let a' = a - 1
+               liftEvent $
+                 do pid <- requireTransactProcessId t
+                    strategyEnqueueWithPriority
+                      (assemblySetGatheringTransacts s)
+                      (transactPriority t)
+                      pid
+                    liftIO $ writeIORef (assemblySetGatheringCounter s) $! a'
                if a' == 0
                  then liftEvent $
                       do let loop acc =
@@ -134,17 +141,15 @@ gatherTransacts t n =
                                     then return (reverse acc)
                                     else do x <- strategyDequeue (assemblySetGatheringTransacts s)
                                             loop (x: acc)
+                             act [] = return ()
+                             act (pid: pids') =
+                               yieldEvent $
+                               do reactivateProcessImmediately pid
+                                  act pids'
                          pids <- loop []
-                         liftIO $ writeIORef (assemblySetGatheringCounter s) $! a'
-                         forM_ pids reactivateProcess
-                 else do liftEvent $
-                           do pid <- requireTransactProcessId t
-                              strategyEnqueueWithPriority
-                                (assemblySetGatheringTransacts s)
-                                (transactPriority t)
-                                pid
-                              liftIO $ writeIORef (assemblySetGatheringCounter s) $! a'
-                         passivateProcess
+                         act pids
+                 else return ()
+               passivateProcess
 
 -- | Test whether another transact is assembled for the corresponding assembly set.
 transactAssembling :: Transact a -> Event Bool

@@ -17,11 +17,9 @@ import Simulation.Aivika.Trans.GPSS.Block
 import Simulation.Aivika.Trans.GPSS.AssemblySet
 import Simulation.Aivika.Trans.GPSS.Transact
 
--- | This is an analog of the GPSS construct
+-- | This is the GPSS construct
 --
 -- @GATHER A@
---
--- Note that unlike GPSS the transacts are reactivated in unspecified order.
 gatherBlock :: MonadDES m
                => Int
                -- ^ the number of transacts to gather
