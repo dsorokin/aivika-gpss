@@ -20,7 +20,8 @@ with much greater marked time can enter the ASSEMBLE block first, which
 may decrease the resulting processing time.
 
 In short, this model is too dependent on the order of computations in 
-the same modelling time.
+the same modelling time. Moreover, it would be more correct to use
+the PREEMPT block than the second SEIZE block.
  -}
  
 {-
