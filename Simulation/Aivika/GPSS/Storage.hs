@@ -292,6 +292,37 @@ enterStorage r transact decrement =
   Cont $ \c ->
   Event $ \p ->
   do let t = pointTime p
+     f <- invokeEvent p $ strategyQueueNull (storageDelayChain r)
+     if f
+       then invokeEvent p $
+            invokeCont c $
+            invokeProcess pid $
+            enterStorage' r transact decrement
+       else do c <- invokeEvent p $
+                    freezeContReentering c () $
+                    invokeCont c $
+                    invokeProcess pid $
+                    enterStorage r transact decrement
+               invokeEvent p $
+                 strategyEnqueueWithPriority
+                 (storageDelayChain r)
+                 (transactPriority transact)
+                 (StorageDelayedItem t decrement c)
+               invokeEvent p $ updateStorageQueueCount r 1
+               
+-- | Enter the storage.
+enterStorage' :: Storage
+                 -- ^ the requested storage
+                 -> Transact a
+                 -- ^ a transact that makes the request
+                 -> Int
+                 -- ^ the content decrement
+                 -> Process ()
+enterStorage' r transact decrement =
+  Process $ \pid ->
+  Cont $ \c ->
+  Event $ \p ->
+  do let t = pointTime p
      a <- readIORef (storageContentRef r)
      if a < decrement
        then do c <- invokeEvent p $
@@ -333,38 +364,45 @@ leaveStorageWithinEvent :: Storage
                            -> Event ()
 leaveStorageWithinEvent r increment =
   Event $ \p ->
-  do invokeEvent p $ updateStorageUtilisationCount r (- increment)
-     invokeEvent p $ leaveStorage' r increment
+  do let t = pointTime p
+     invokeEvent p $ updateStorageUtilisationCount r (- increment)
+     invokeEvent p $ updateStorageContent r increment
+     invokeEvent p $ enqueueEvent t $ tryEnterStorage r
 
--- | Leave the storage.
-leaveStorage' :: Storage
-                 -- ^ the storage to leave
-                 -> Int
-                 -- ^ the content increment
-                 -> Event ()
-leaveStorage' r increment =
+-- | Try to enter the storage.
+tryEnterStorage :: Storage -> Event ()
+tryEnterStorage r =
   Event $ \p ->
   do let t = pointTime p
      a <- readIORef (storageContentRef r)
-     let a' = a + increment
-     when (a' > storageCapacity r) $
+     if a > 0
+       then invokeEvent p $ letEnterStorage r
+       else return ()
+
+-- | Let enter the storage.
+letEnterStorage :: Storage -> Event ()
+letEnterStorage r =
+  Event $ \p ->
+  do let t = pointTime p
+     a <- readIORef (storageContentRef r)
+     when (a > storageCapacity r) $
        throwIO $
        SimulationRetry $
        "The storage content cannot exceed the limited capacity: leaveStorage'"
      x <- invokeEvent p $
           strategyQueueDeleteBy
           (storageDelayChain r)
-          (\i -> delayedItemDecrement i <= a')
+          (\i -> delayedItemDecrement i <= a)
      case x of
-       Nothing -> invokeEvent p $ updateStorageContent r increment
+       Nothing -> return ()
        Just (StorageDelayedItem t0 decrement0 c0) ->
          do invokeEvent p $ updateStorageQueueCount r (-1)
             c <- invokeEvent p $ unfreezeCont c0
             case c of
               Nothing ->
-                invokeEvent p $ leaveStorage' r increment
+                invokeEvent p $ letEnterStorage r
               Just c ->
-                do invokeEvent p $ updateStorageContent r (increment - decrement0)
+                do invokeEvent p $ updateStorageContent r (- decrement0)
                    invokeEvent p $ updateStorageWaitTime r (t - t0)
                    invokeEvent p $ updateStorageUtilisationCount r decrement0
                    invokeEvent p $ updateStorageUseCount r 1

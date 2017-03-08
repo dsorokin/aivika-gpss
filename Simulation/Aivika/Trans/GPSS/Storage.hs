@@ -322,6 +322,39 @@ enterStorage r transact decrement =
   Cont $ \c ->
   Event $ \p ->
   do let t = pointTime p
+     f <- invokeEvent p $ strategyQueueNull (storageDelayChain r)
+     if f
+       then invokeEvent p $
+            invokeCont c $
+            invokeProcess pid $
+            enterStorage' r transact decrement
+       else do c <- invokeEvent p $
+                    freezeContReentering c () $
+                    invokeCont c $
+                    invokeProcess pid $
+                    enterStorage r transact decrement
+               invokeEvent p $
+                 strategyEnqueueWithPriority
+                 (storageDelayChain r)
+                 (transactPriority transact)
+                 (StorageDelayedItem t decrement c)
+               invokeEvent p $ updateStorageQueueCount r 1
+
+-- | Enter the storage.
+enterStorage' :: MonadDES m
+                 => Storage m
+                 -- ^ the requested storage
+                 -> Transact m a
+                 -- ^ a transact that makes the request
+                 -> Int
+                 -- ^ the content decrement
+                 -> Process m ()
+{-# INLINABLE enterStorage' #-}
+enterStorage' r transact decrement =
+  Process $ \pid ->
+  Cont $ \c ->
+  Event $ \p ->
+  do let t = pointTime p
      a <- invokeEvent p $ readRef (storageContentRef r)
      if a < decrement
        then do c <- invokeEvent p $
@@ -367,40 +400,47 @@ leaveStorageWithinEvent :: MonadDES m
 {-# INLINABLE leaveStorageWithinEvent #-}
 leaveStorageWithinEvent r increment =
   Event $ \p ->
-  do invokeEvent p $ updateStorageUtilisationCount r (- increment)
-     invokeEvent p $ leaveStorage' r increment
+  do let t = pointTime p
+     invokeEvent p $ updateStorageUtilisationCount r (- increment)
+     invokeEvent p $ updateStorageContent r increment
+     invokeEvent p $ enqueueEvent t $ tryEnterStorage r
 
--- | Leave the storage.
-leaveStorage' :: MonadDES m
-                 => Storage m
-                 -- ^ the storage to leave
-                 -> Int
-                 -- ^ the content increment
-                 -> Event m ()
-{-# INLINABLE leaveStorage' #-}
-leaveStorage' r increment =
+-- | Try to enter the storage.
+tryEnterStorage :: MonadDES m => Storage m -> Event m ()
+{-# INLINABLE tryEnterStorage #-}
+tryEnterStorage r =
   Event $ \p ->
   do let t = pointTime p
      a <- invokeEvent p $ readRef (storageContentRef r)
-     let a' = a + increment
-     when (a' > storageCapacity r) $
+     if a > 0
+       then invokeEvent p $ letEnterStorage r
+       else return ()
+
+-- | Let enter the storage.
+letEnterStorage :: MonadDES m => Storage m -> Event m ()
+{-# INLINABLE letEnterStorage #-}
+letEnterStorage r =
+  Event $ \p ->
+  do let t = pointTime p
+     a <- invokeEvent p $ readRef (storageContentRef r)
+     when (a > storageCapacity r) $
        throwComp $
        SimulationRetry $
        "The storage content cannot exceed the limited capacity: leaveStorage'"
      x <- invokeEvent p $
           strategyQueueDeleteBy
           (storageDelayChain r)
-          (\i -> delayedItemDecrement i <= a')
+          (\i -> delayedItemDecrement i <= a)
      case x of
-       Nothing -> invokeEvent p $ updateStorageContent r increment
+       Nothing -> return ()
        Just (StorageDelayedItem t0 decrement0 c0) ->
          do invokeEvent p $ updateStorageQueueCount r (-1)
             c <- invokeEvent p $ unfreezeCont c0
             case c of
               Nothing ->
-                invokeEvent p $ leaveStorage' r increment
+                invokeEvent p $ letEnterStorage r
               Just c ->
-                do invokeEvent p $ updateStorageContent r (increment - decrement0)
+                do invokeEvent p $ updateStorageContent r (- decrement0)
                    invokeEvent p $ updateStorageWaitTime r (t - t0)
                    invokeEvent p $ updateStorageUtilisationCount r decrement0
                    invokeEvent p $ updateStorageUseCount r 1
