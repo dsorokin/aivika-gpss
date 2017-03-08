@@ -14,7 +14,9 @@ module Simulation.Aivika.GPSS.MatchChain
         newMatchChain,
         matchTransact,
         transactMatching,
-        transactMatchingChanged_) where
+        transactMatchingChanged,
+        transactMatchingChangedByTransact_,
+        transactMatchingChangedByAssemblySet_) where
 
 import Data.IORef
 
@@ -74,8 +76,23 @@ transactMatching chain set =
      return (HM.member set map)
 
 -- | Signal each time the 'transactMatching' flag changes.
-transactMatchingChanged_ :: MatchChain -> AssemblySet -> Signal ()
-transactMatchingChanged_ chain set =
+transactMatchingChangedByAssemblySet_ :: MatchChain -> AssemblySet -> Signal ()
+transactMatchingChangedByAssemblySet_ chain set =
   mapSignal (const ()) $
   filterSignal (== set) $
+  transactMatchingChanged chain
+
+-- | Signal each time the 'transactMatching' flag changes.
+transactMatchingChangedByTransact_ :: MatchChain -> Transact a -> Signal ()
+transactMatchingChangedByTransact_ chain t =
+  mapSignal (const ()) $
+  filterSignalM pred $
+  transactMatchingChanged chain
+    where pred set =
+            do set' <- transactAssemblySet t
+               return (set == set')
+
+-- | Signal each time the 'transactMatching' flag changes.
+transactMatchingChanged :: MatchChain -> Signal AssemblySet
+transactMatchingChanged chain =
   publishSignal (matchChainSource chain)

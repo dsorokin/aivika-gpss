@@ -14,7 +14,9 @@ module Simulation.Aivika.Trans.GPSS.MatchChain
         newMatchChain,
         matchTransact,
         transactMatching,
-        transactMatchingChanged_) where
+        transactMatchingChanged,
+        transactMatchingChangedByTransact_,
+        transactMatchingChangedByAssemblySet_) where
 
 import Control.Monad
 import Control.Monad.Trans
@@ -75,9 +77,26 @@ transactMatching chain set =
      return (HM.member set map)
 
 -- | Signal each time the 'transactMatching' flag changes.
-transactMatchingChanged_ :: MonadDES m => MatchChain m -> AssemblySet m -> Signal m ()
-{-# INLINABLE transactMatchingChanged_ #-}
-transactMatchingChanged_ chain set =
+transactMatchingChangedByAssemblySet_ :: MonadDES m => MatchChain m -> AssemblySet m -> Signal m ()
+{-# INLINABLE transactMatchingChangedByAssemblySet_ #-}
+transactMatchingChangedByAssemblySet_ chain set =
   mapSignal (const ()) $
   filterSignal (== set) $
+  transactMatchingChanged chain
+
+-- | Signal each time the 'transactMatching' flag changes.
+transactMatchingChangedByTransact_ :: MonadDES m => MatchChain m -> Transact m a -> Signal m ()
+{-# INLINABLE transactMatchingChangedByTransact_ #-}
+transactMatchingChangedByTransact_ chain t =
+  mapSignal (const ()) $
+  filterSignalM pred $
+  transactMatchingChanged chain
+    where pred set =
+            do set' <- transactAssemblySet t
+               return (set == set')
+
+-- | Signal each time the 'transactMatching' flag changes.
+transactMatchingChanged :: MonadDES m => MatchChain m -> Signal m (AssemblySet m)
+{-# INLINABLE transactMatchingChanged #-}
+transactMatchingChanged chain =
   publishSignal (matchChainSource chain)
