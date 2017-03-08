@@ -1,30 +1,5 @@
 
 {-
-CAUTION
-
-This is namely that case when there is a mismatch in the behaviour of 
-AivikaSim and GPSS. It happens by the following reasons:
-
-- the modeller tries to release a Facility, change the transact priority 
-and seize the same Facility again. Unlike GPSS, AivikaSim executes 
-the realising of the Facility immediately, which means that the Facility 
-can be captured by another transact before the source transact captures 
-the Facility anew. In case of need, this behaviour can change in AivikaSim, 
-but there is a more difficult next issue;
-
-- we rely on the time marked in the transact to get the final statistics. 
-Therefore, it is very important which of the transacts enters the ASSEMBLE 
-block first. Unlike GPSS, AivikaSim reactivates the transacts from 
-the preceding GATHER block in unspecified order. Therefore, any transact 
-with much greater marked time can enter the ASSEMBLE block first, which 
-may decrease the resulting processing time.
-
-In short, this model is too dependent on the order of computations in 
-the same modelling time. Moreover, it would be more correct to use
-the PREEMPT block instead of the second SEIZE block.
- -}
- 
-{-
 TATYM   TABLE M1,450,20,20
 
         GENERATE ,,,1
