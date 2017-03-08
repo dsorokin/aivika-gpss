@@ -68,20 +68,16 @@ matchTransact chain t =
             passivateProcess
 
 -- | Test whether there is a matching transact.
-transactMatching :: MonadDES m => MatchChain m -> Transact m a -> Event m Bool
+transactMatching :: MonadDES m => MatchChain m -> AssemblySet m -> Event m Bool
 {-# INLINABLE transactMatching #-}
-transactMatching chain t =
+transactMatching chain set =
   do map <- readRef (matchChainMap chain)
-     set <- transactAssemblySet t
      return (HM.member set map)
 
 -- | Signal each time the 'transactMatching' flag changes.
-transactMatchingChanged_ :: MonadDES m => MatchChain m -> Transact m a -> Signal m ()
+transactMatchingChanged_ :: MonadDES m => MatchChain m -> AssemblySet m -> Signal m ()
 {-# INLINABLE transactMatchingChanged_ #-}
-transactMatchingChanged_ chain t =
+transactMatchingChanged_ chain set =
   mapSignal (const ()) $
-  filterSignalM pred $
+  filterSignal (== set) $
   publishSignal (matchChainSource chain)
-    where pred set =
-            do set' <- transactAssemblySet t
-               return (set == set')

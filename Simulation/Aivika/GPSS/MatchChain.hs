@@ -68,18 +68,14 @@ matchTransact chain t =
             passivateProcess
 
 -- | Test whether there is a matching transact.
-transactMatching :: MatchChain -> Transact a -> Event Bool
-transactMatching chain t =
+transactMatching :: MatchChain -> AssemblySet -> Event Bool
+transactMatching chain set =
   do map <- liftIO $ readIORef (matchChainMap chain)
-     set <- transactAssemblySet t
      return (HM.member set map)
 
 -- | Signal each time the 'transactMatching' flag changes.
-transactMatchingChanged_ :: MatchChain -> Transact a -> Signal ()
-transactMatchingChanged_ chain t =
+transactMatchingChanged_ :: MatchChain -> AssemblySet -> Signal ()
+transactMatchingChanged_ chain set =
   mapSignal (const ()) $
-  filterSignalM pred $
+  filterSignal (== set) $
   publishSignal (matchChainSource chain)
-    where pred set =
-            do set' <- transactAssemblySet t
-               return (set == set')
