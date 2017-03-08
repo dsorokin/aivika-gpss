@@ -17,13 +17,9 @@ import Simulation.Aivika.Trans.GPSS.Transact
 import Simulation.Aivika.Trans.GPSS.Block
 import Simulation.Aivika.Trans.GPSS.Facility
 
--- | This is an analog of the GPSS construct
+-- | This is the GPSS construct
 --
 -- @RETURN A@
---
--- Note that unlike GPSS the return of Facility has immediate effect, which means
--- that another transact may capture the Facility before the current transact
--- finishes leaving the block.
 returnBlock :: MonadDES m
                => Facility m a
                -- ^ the facility

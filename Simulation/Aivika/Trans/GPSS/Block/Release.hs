@@ -17,13 +17,9 @@ import Simulation.Aivika.Trans.GPSS.Transact
 import Simulation.Aivika.Trans.GPSS.Block
 import Simulation.Aivika.Trans.GPSS.Facility
 
--- | This is an analog of the GPSS construct
+-- | This is the GPSS construct
 --
 -- @RELEASE A@
---
--- Note that unlike GPSS the releasing of Facility has immediate effect, which means
--- that another transact may capture the Facility before the current transact
--- finishes leaving the block.
 releaseBlock :: MonadDES m
                 => Facility m a
                 -- ^ the facility
