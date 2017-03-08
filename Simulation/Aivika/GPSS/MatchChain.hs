@@ -13,7 +13,8 @@ module Simulation.Aivika.GPSS.MatchChain
        (MatchChain,
         newMatchChain,
         matchTransact,
-        transactMatching) where
+        transactMatching,
+        transactMatchingChanged_) where
 
 import Data.IORef
 
@@ -28,13 +29,18 @@ import Simulation.Aivika.GPSS.AssemblySet
 
 -- | Represents a Match Chain.
 data MatchChain =
-  MatchChain { matchChainMap :: IORef (HM.HashMap AssemblySet ProcessId) }
+  MatchChain { matchChainMap :: IORef (HM.HashMap AssemblySet ProcessId),
+               matchChainSource :: SignalSource AssemblySet
+             }
 
 -- | Create a new Match Chain.
 newMatchChain :: Simulation MatchChain
 newMatchChain =
   do map <- liftIO $ newIORef HM.empty
-     return MatchChain { matchChainMap = map }
+     src <- newSignalSource
+     return MatchChain { matchChainMap = map,
+                         matchChainSource = src
+                       }
 
 -- | Match the transact.
 matchTransact :: MatchChain -> Transact a -> Process ()
@@ -49,12 +55,16 @@ matchTransact chain t =
          liftEvent $
            do liftIO $ modifyIORef (matchChainMap chain) $
                 HM.delete set
+              yieldEvent $
+                triggerSignal (matchChainSource chain) set
               reactivateProcess pid
        Nothing ->
          do liftEvent $
               do pid <- requireTransactProcessId t
                  liftIO $ modifyIORef (matchChainMap chain) $
                    HM.insert set pid
+                 yieldEvent $
+                   triggerSignal (matchChainSource chain) set
             passivateProcess
 
 -- | Test whether there is a matching transact.
@@ -63,3 +73,13 @@ transactMatching chain t =
   do map <- liftIO $ readIORef (matchChainMap chain)
      set <- transactAssemblySet t
      return (HM.member set map)
+
+-- | Signal each time the 'transactMatching' flag changes.
+transactMatchingChanged_ :: MatchChain -> Transact a -> Signal ()
+transactMatchingChanged_ chain t =
+  mapSignal (const ()) $
+  filterSignalM pred $
+  publishSignal (matchChainSource chain)
+    where pred set =
+            do set' <- transactAssemblySet t
+               return (set == set')
