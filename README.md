@@ -6,7 +6,7 @@ translate your models from GPSS into AivikaSim, for example,
 for running the [nested] [1] or [distributed] [2] simulation.
 
 The represented DSL is quite similar, but it is not always equivalent. 
-GPSS is trying to be too determenistic when describing the behavior of 
+GPSS is trying to be too deterministic when describing the behavior of 
 transacts in the same time points, regulating the precise order of that 
 how the transacts enter the blocks for the same modeling time. On the contrary, 
 AivikaSim imposes less restrictions on the order of computations. Moreover, 
