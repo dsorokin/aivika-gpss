@@ -17,9 +17,13 @@ import Simulation.Aivika.Trans.GPSS.Transact
 import Simulation.Aivika.Trans.GPSS.Block
 import Simulation.Aivika.Trans.GPSS.Storage
 
--- | This is the GPSS construct
+-- | This is an analog of the GPSS construct
 --
 -- @LEAVE A,B@
+--
+-- Note that unlike GPSS the leaving of Storage has immediate effect, which means
+-- that another transact may enter the Storage before the current transact
+-- finishes leaving the block.
 leaveBlock :: MonadDES m
               => Storage m
               -- ^ the storage
