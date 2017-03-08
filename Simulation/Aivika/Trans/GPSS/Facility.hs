@@ -363,6 +363,43 @@ seizeFacility r transact =
   Cont $ \c ->
   Event $ \p ->
   do let t = pointTime p
+     f <- do f1 <- invokeEvent p $ strategyQueueNull (facilityDelayChain r)
+             if f1
+               then do f2 <- invokeEvent p $ strategyQueueNull (facilityInterruptChain r)
+                       if f2
+                         then invokeEvent p $ strategyQueueNull (facilityPendingChain r)
+                         else return False
+               else return False
+     if f
+       then invokeEvent p $
+            invokeCont c $
+            invokeProcess pid $
+            seizeFacility' r transact
+       else do c <- invokeEvent p $
+                    freezeContReentering c () $
+                    invokeCont c $
+                    invokeProcess pid $
+                    seizeFacility r transact
+               invokeEvent p $
+                 strategyEnqueueWithPriority
+                 (facilityDelayChain r)
+                 (transactPriority transact)
+                 (FacilityDelayedItem transact t False c)
+               invokeEvent p $ updateFacilityQueueCount r 1
+
+-- | Seize the facility.
+seizeFacility' :: MonadDES m
+                  => Facility m a
+                  -- ^ the requested facility
+                  -> Transact m a
+                  -- ^ the transact that tries to seize the facility
+                  -> Process m ()
+{-# INLINABLE seizeFacility' #-}
+seizeFacility' r transact =
+  Process $ \pid ->
+  Cont $ \c ->
+  Event $ \p ->
+  do let t = pointTime p
      a <- invokeEvent p $ readRef (facilityOwnerRef r)
      case a of
        Nothing ->
@@ -518,17 +555,30 @@ releaseFacility' r transact preempting =
          do invokeEvent p $ writeRef (facilityOwnerRef r) Nothing
             invokeEvent p $ updateFacilityUtilisationCount r (-1)
             invokeEvent p $ updateFacilityHoldingTime r (acc0 + (t - t0))
-            invokeEvent p $ releaseFacility'' r
+            invokeEvent p $ updateFacilityCount r 1
+            invokeEvent p $ enqueueEvent t $ tryCaptureFacility r
             invokeEvent p $ resumeCont c ()
        Just owner ->
          throwComp $
          SimulationRetry
          "The facility has another owner: releaseFacility'"
 
+-- | Try to capture the facility.
+tryCaptureFacility :: MonadDES m => Facility m a -> Event m ()
+{-# INLINABLE tryCaptureFacility #-}
+tryCaptureFacility r =
+  Event $ \p ->
+  do let t = pointTime p
+     a <- invokeEvent p $ readRef (facilityOwnerRef r)
+     case a of
+       Nothing ->
+         invokeEvent p $ captureFacility r
+       Just owner -> return ()
+
 -- | Find another owner of the facility.
-releaseFacility'' :: MonadDES m => Facility m a -> Event m ()
-{-# INLINABLE releaseFacility'' #-}
-releaseFacility'' r =
+captureFacility :: MonadDES m => Facility m a -> Event m ()
+{-# INLINABLE captureFacility #-}
+captureFacility r =
   Event $ \p ->
   do let t = pointTime p
      f <- invokeEvent p $ strategyQueueNull (facilityPendingChain r)
@@ -538,12 +588,13 @@ releaseFacility'' r =
                c <- invokeEvent p $ unfreezeCont c0
                case c of
                  Nothing ->
-                   invokeEvent p $ releaseFacility'' r
+                   invokeEvent p $ captureFacility r
                  Just c ->
                    do invokeEvent p $ writeRef (facilityOwnerRef r) $ Just (FacilityOwnerItem transact t preempting 0)
                       invokeEvent p $ updateFacilityWaitTime r (t - t0)
                       invokeEvent p $ updateFacilityUtilisationCount r 1
                       invokeEvent p $ updateFacilityCaptureCount r 1
+                      invokeEvent p $ updateFacilityCount r (-1)
                       invokeEvent p $ enqueueEvent t $ reenterCont c ()
        else do f <- invokeEvent p $ strategyQueueNull (facilityInterruptChain r)
                if not f
@@ -553,11 +604,12 @@ releaseFacility'' r =
                           f <- invokeEvent p $ processCancelled pid
                           case f of
                             True ->
-                              invokeEvent p $ releaseFacility'' r
+                              invokeEvent p $ captureFacility r
                             False ->
                               do invokeEvent p $ writeRef (facilityOwnerRef r) $ Just (FacilityOwnerItem transact t preempting acc0)
                                  invokeEvent p $ updateFacilityWaitTime r (t - t0)
                                  invokeEvent p $ updateFacilityUtilisationCount r 1
+                                 invokeEvent p $ updateFacilityCount r (-1)
                                  case transfer0 of
                                    Nothing -> return ()
                                    Just transfer ->
@@ -570,14 +622,15 @@ releaseFacility'' r =
                                    c <- invokeEvent p $ unfreezeCont c0
                                    case c of
                                      Nothing ->
-                                       invokeEvent p $ releaseFacility'' r
+                                       invokeEvent p $ captureFacility r
                                      Just c ->
                                        do invokeEvent p $ writeRef (facilityOwnerRef r) $ Just (FacilityOwnerItem transact t preempting 0)
                                           invokeEvent p $ updateFacilityWaitTime r (t - t0)
                                           invokeEvent p $ updateFacilityUtilisationCount r 1
                                           invokeEvent p $ updateFacilityCaptureCount r 1
+                                          invokeEvent p $ updateFacilityCount r (-1)
                                           invokeEvent p $ enqueueEvent t $ reenterCont c ()
-                           else invokeEvent p $ updateFacilityCount r 1
+                           else return ()
 
 -- | Signal triggered when one of the facility counters changes.
 facilityChanged_ :: MonadDES m => Facility m a -> Signal m ()
