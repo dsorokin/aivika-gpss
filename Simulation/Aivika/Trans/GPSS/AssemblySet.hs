@@ -138,7 +138,8 @@ gatherTransacts t n =
                       pid
                     writeRef (assemblySetGatheringCounter s) $! a'
                if a' == 0
-                 then liftEvent $
+                 then passivateProcessBefore $
+                      liftEvent $
                       do let loop acc =
                                do f <- strategyQueueNull (assemblySetGatheringTransacts s)
                                   if f
@@ -147,13 +148,11 @@ gatherTransacts t n =
                                             loop (x: acc)
                              act [] = return ()
                              act (pid: pids') =
-                               yieldEvent $
                                do reactivateProcessImmediately pid
-                                  act pids'
+                                  yieldEvent $ act pids'
                          pids <- loop []
                          act pids
-                 else return ()
-               passivateProcess
+                 else passivateProcess
 
 -- | Test whether another transact is assembled for the corresponding assembly set.
 transactAssembling :: MonadDES m => Transact m a -> Event m Bool
