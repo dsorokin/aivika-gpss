@@ -21,6 +21,7 @@ module Simulation.Aivika.Trans.GPSS
         module Simulation.Aivika.Trans.GPSS.Block.Generate,
         module Simulation.Aivika.Trans.GPSS.Block.Leave,
         module Simulation.Aivika.Trans.GPSS.Block.Link,
+        module Simulation.Aivika.Trans.GPSS.Block.Loop,
         module Simulation.Aivika.Trans.GPSS.Block.Match,
         module Simulation.Aivika.Trans.GPSS.Block.Preempt,
         module Simulation.Aivika.Trans.GPSS.Block.Priority,
@@ -51,6 +52,7 @@ import Simulation.Aivika.Trans.GPSS.Block.Gather
 import Simulation.Aivika.Trans.GPSS.Block.Generate
 import Simulation.Aivika.Trans.GPSS.Block.Leave
 import Simulation.Aivika.Trans.GPSS.Block.Link
+import Simulation.Aivika.Trans.GPSS.Block.Loop
 import Simulation.Aivika.Trans.GPSS.Block.Match
 import Simulation.Aivika.Trans.GPSS.Block.Preempt
 import Simulation.Aivika.Trans.GPSS.Block.Priority
