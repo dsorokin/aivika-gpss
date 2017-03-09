@@ -55,6 +55,7 @@ library
                      Simulation.Aivika.GPSS.Block.Seize
                      Simulation.Aivika.GPSS.Block.Split
                      Simulation.Aivika.GPSS.Block.Terminate
+                     Simulation.Aivika.GPSS.Block.Test
                      Simulation.Aivika.GPSS.Block.Transfer
                      Simulation.Aivika.GPSS.Block.Unlink
                      Simulation.Aivika.GPSS.AssemblySet
@@ -86,6 +87,7 @@ library
                      Simulation.Aivika.Trans.GPSS.Block.Seize
                      Simulation.Aivika.Trans.GPSS.Block.Split
                      Simulation.Aivika.Trans.GPSS.Block.Terminate
+                     Simulation.Aivika.Trans.GPSS.Block.Test
                      Simulation.Aivika.Trans.GPSS.Block.Transfer
                      Simulation.Aivika.Trans.GPSS.Block.Unlink
                      Simulation.Aivika.Trans.GPSS.AssemblySet
