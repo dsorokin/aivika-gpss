@@ -12,6 +12,7 @@
 module Simulation.Aivika.GPSS.Block
        (Block(..),
         GeneratorBlock(..),
+        withinBlock,
         traceBlock) where
 
 import Control.Monad
@@ -37,6 +38,14 @@ instance C.Category Block where
   id = Block { blockProcess = return }
 
   x . y = Block { blockProcess = \a -> do { b <- blockProcess y a; blockProcess x b } }
+
+-- | Perform some action within the block, for example,
+-- opening or inverting the 'Gate' to emulate the LOGIC block.
+withinBlock :: Process ()
+               -- ^ the action to be executed for each transact
+               -> Block a a
+withinBlock m =
+  Block { blockProcess = \a -> m >> return a }
 
 -- | Trace the specified block.
 traceBlock :: String -> Block a b -> Block a b
