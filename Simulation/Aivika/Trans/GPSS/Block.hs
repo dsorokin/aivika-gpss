@@ -12,6 +12,7 @@
 module Simulation.Aivika.Trans.GPSS.Block
        (Block(..),
         GeneratorBlock(..),
+        withinBlock,
         traceBlock) where
 
 import Control.Monad
@@ -39,6 +40,16 @@ instance MonadDES m => C.Category (Block m) where
 
   {-# INLINABLE (.) #-}
   x . y = Block { blockProcess = \a -> do { b <- blockProcess y a; blockProcess x b } }
+
+-- | Perform some action within the block, for example,
+-- opening or inverting the 'Gate' to emulate the LOGIC block.
+withinBlock :: MonadDES m
+               => Process m ()
+               -- ^ the action to be executed for each transact
+               -> Block m a a
+{-# INLINABLE withinBlock #-}
+withinBlock m =
+  Block { blockProcess = \a -> m >> return a }
 
 -- | Trace the specified block.
 traceBlock :: MonadDES m => String -> Block m a b -> Block m a b

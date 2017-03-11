@@ -21,6 +21,7 @@ module Simulation.Aivika.GPSS
         module Simulation.Aivika.GPSS.Block.Generate,
         module Simulation.Aivika.GPSS.Block.Leave,
         module Simulation.Aivika.GPSS.Block.Link,
+        module Simulation.Aivika.GPSS.Block.Loop,
         module Simulation.Aivika.GPSS.Block.Match,
         module Simulation.Aivika.GPSS.Block.Preempt,
         module Simulation.Aivika.GPSS.Block.Priority,
@@ -30,6 +31,7 @@ module Simulation.Aivika.GPSS
         module Simulation.Aivika.GPSS.Block.Seize,
         module Simulation.Aivika.GPSS.Block.Split,
         module Simulation.Aivika.GPSS.Block.Terminate,
+        module Simulation.Aivika.GPSS.Block.Test,
         module Simulation.Aivika.GPSS.Block.Transfer,
         module Simulation.Aivika.GPSS.Block.Unlink,
         module Simulation.Aivika.GPSS.AssemblySet,
@@ -51,6 +53,7 @@ import Simulation.Aivika.GPSS.Block.Gather
 import Simulation.Aivika.GPSS.Block.Generate
 import Simulation.Aivika.GPSS.Block.Leave
 import Simulation.Aivika.GPSS.Block.Link
+import Simulation.Aivika.GPSS.Block.Loop
 import Simulation.Aivika.GPSS.Block.Match
 import Simulation.Aivika.GPSS.Block.Preempt
 import Simulation.Aivika.GPSS.Block.Priority
@@ -60,6 +63,7 @@ import Simulation.Aivika.GPSS.Block.Return
 import Simulation.Aivika.GPSS.Block.Seize
 import Simulation.Aivika.GPSS.Block.Split
 import Simulation.Aivika.GPSS.Block.Terminate
+import Simulation.Aivika.GPSS.Block.Test
 import Simulation.Aivika.GPSS.Block.Transfer
 import Simulation.Aivika.GPSS.Block.Unlink
 import Simulation.Aivika.GPSS.AssemblySet

@@ -46,6 +46,7 @@ library
                      Simulation.Aivika.GPSS.Block.Generate
                      Simulation.Aivika.GPSS.Block.Leave
                      Simulation.Aivika.GPSS.Block.Link
+                     Simulation.Aivika.GPSS.Block.Loop
                      Simulation.Aivika.GPSS.Block.Match
                      Simulation.Aivika.GPSS.Block.Preempt
                      Simulation.Aivika.GPSS.Block.Priority
@@ -55,6 +56,7 @@ library
                      Simulation.Aivika.GPSS.Block.Seize
                      Simulation.Aivika.GPSS.Block.Split
                      Simulation.Aivika.GPSS.Block.Terminate
+                     Simulation.Aivika.GPSS.Block.Test
                      Simulation.Aivika.GPSS.Block.Transfer
                      Simulation.Aivika.GPSS.Block.Unlink
                      Simulation.Aivika.GPSS.AssemblySet
@@ -78,6 +80,7 @@ library
                      Simulation.Aivika.Trans.GPSS.Block.Generate
                      Simulation.Aivika.Trans.GPSS.Block.Leave
                      Simulation.Aivika.Trans.GPSS.Block.Link
+                     Simulation.Aivika.Trans.GPSS.Block.Loop
                      Simulation.Aivika.Trans.GPSS.Block.Match
                      Simulation.Aivika.Trans.GPSS.Block.Preempt
                      Simulation.Aivika.Trans.GPSS.Block.Priority
@@ -87,6 +90,7 @@ library
                      Simulation.Aivika.Trans.GPSS.Block.Seize
                      Simulation.Aivika.Trans.GPSS.Block.Split
                      Simulation.Aivika.Trans.GPSS.Block.Terminate
+                     Simulation.Aivika.Trans.GPSS.Block.Test
                      Simulation.Aivika.Trans.GPSS.Block.Transfer
                      Simulation.Aivika.Trans.GPSS.Block.Unlink
                      Simulation.Aivika.Trans.GPSS.AssemblySet
