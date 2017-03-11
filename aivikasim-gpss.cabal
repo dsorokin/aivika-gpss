@@ -63,6 +63,7 @@ library
                      Simulation.Aivika.GPSS.Queue
                      Simulation.Aivika.GPSS.Results
                      Simulation.Aivika.GPSS.Results.Locale
+                     Simulation.Aivika.GPSS.Results.Transform
                      Simulation.Aivika.GPSS.Storage
                      Simulation.Aivika.GPSS.Transact
                      Simulation.Aivika.GPSS.TransactQueueStrategy
@@ -94,6 +95,7 @@ library
                      Simulation.Aivika.Trans.GPSS.Queue
                      Simulation.Aivika.Trans.GPSS.Results
                      Simulation.Aivika.Trans.GPSS.Results.Locale
+                     Simulation.Aivika.Trans.GPSS.Results.Transform
                      Simulation.Aivika.Trans.GPSS.Storage
                      Simulation.Aivika.Trans.GPSS.Transact
                      Simulation.Aivika.Trans.GPSS.TransactQueueStrategy
