@@ -36,6 +36,7 @@ module Simulation.Aivika.Trans.GPSS
         module Simulation.Aivika.Trans.GPSS.Facility,
         module Simulation.Aivika.Trans.GPSS.MatchChain,
         module Simulation.Aivika.Trans.GPSS.Results,
+        module Simulation.Aivika.Trans.GPSS.Results.Locale,
         module Simulation.Aivika.Trans.GPSS.Storage,
         module Simulation.Aivika.Trans.GPSS.Transact,
         module Simulation.Aivika.Trans.GPSS.TransactQueueStrategy) where
@@ -65,6 +66,7 @@ import Simulation.Aivika.Trans.GPSS.AssemblySet
 import Simulation.Aivika.Trans.GPSS.Facility
 import Simulation.Aivika.Trans.GPSS.MatchChain
 import Simulation.Aivika.Trans.GPSS.Results
+import Simulation.Aivika.Trans.GPSS.Results.Locale
 import Simulation.Aivika.Trans.GPSS.Storage
 import Simulation.Aivika.Trans.GPSS.Transact
 import Simulation.Aivika.Trans.GPSS.TransactQueueStrategy
