@@ -28,7 +28,7 @@ import Simulation.Aivika.Trans.GPSS.Results.Locale
 newtype Queue m = Queue (ResultTransform m)
 
 -- | An instance of the result transformer.
-instance T.ResultTransformer (Queue m) m where
+instance T.ResultTransformer Queue m where
   tr (Queue a) = a
 
 -- | Property 'Q.queueNull'.
@@ -75,7 +75,7 @@ queueRate (Queue a) =
 newtype Facility m = Facility (ResultTransform m)
 
 -- | An instance of the result transformer.
-instance T.ResultTransformer (Facility m) m where
+instance T.ResultTransformer Facility m where
   tr (Facility a) = a
 
 -- | Property 'F.facilityCount'.
@@ -142,7 +142,7 @@ facilityInterrupted (Facility a) =
 newtype Storage m = Storage (ResultTransform m)
 
 -- | An instance of the result transformer.
-instance T.ResultTransformer (Storage m) m where
+instance T.ResultTransformer Storage m where
   tr (Storage a) = a
 
 -- | Property 'S.storageCapacity'.
