@@ -1,4 +1,4 @@
-GPSS-like DSL for AivikaSim
+GPSS-like DSL for Aivika
 
 This package allows defining simulation models in terms of a GPSS-like
 domain specific language, which can be useful if you are going to
