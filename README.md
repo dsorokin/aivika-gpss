@@ -17,10 +17,10 @@ and ASSEMBLE. But unlike GPSS, the blocks behave independently from each other, 
 the transact priorities are not used when deciding which of the blocks will be activated next.
 The order of activating blocks is unpredictable.
 
-The package creates a new discontinuous process for each new transact. Then that process becomes 
-fully responsible for processing the transact by the blocks. Therefore, the speed of simulation 
-is slower that it could be when implementing the same model but based on using the standard Aivika 
-facilities. 
+There is a layer of emulation. The package creates a new discontinuous process for each 
+new transact. Then that process becomes fully responsible for processing the transact by 
+the blocks. Therefore, the speed of simulation is slower that it could be when implementing 
+the same model but based on using the standard Aivika facilities. 
 
 The rough estimation is that this particular package is slower in 2-3 times than the existent GPSS 
 simulators in case of sequential simulation. But the point is that you can combine GPSS with 
