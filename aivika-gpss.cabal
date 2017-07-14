@@ -1,5 +1,5 @@
 name:            aivika-gpss
-version:         0.2
+version:         0.3
 synopsis:        GPSS-like DSL for Aivika
 description:
     This package allows defining simulation models in terms of a GPSS-like
@@ -24,7 +24,7 @@ description:
     is slower that it could be when implementing the same model but based on using the standard Aivika 
     facilities. 
     .
-    The rough estimation is that this particular package is slower in 5-6 times than the existent GPSS 
+    The rough estimation is that this particular package is slower in 2-3 times than the existent GPSS 
     simulators in case of sequential simulation. But the point is that you can combine GPSS with 
     discontinuous processes, events and even agents within the same model. Moreover, you can use GPSS
     in parallel and distributed simulation models. 
@@ -34,9 +34,9 @@ description:
     \[2] <http://hackage.haskell.org/package/aivika-transformers>
     .
 category:        Simulation
-license:         AllRightsReserved
+license:         BSD3
 license-file:    LICENSE
-copyright:       (c) 2012-2017. David Sorokin <david.sorokin@gmail.com>
+copyright:       (c) 2017. David Sorokin <david.sorokin@gmail.com>
 author:          David Sorokin
 maintainer:      David Sorokin <david.sorokin@gmail.com>
 homepage:        http://www.aivikasoft.com
@@ -132,13 +132,14 @@ library
                      containers >= 0.4.0.0,
                      hashable >= 1.2.0.0,
                      unordered-containers >= 0.1.0.0,
-                     aivika >= 5.1,
-                     aivika-transformers >= 5.1
+                     aivika >= 5.2,
+                     aivika-transformers >= 5.2
 
     extensions:      MultiParamTypeClasses,
                      TypeFamilies,
                      FlexibleInstances,
-                     FlexibleContexts
+                     FlexibleContexts,
+                     KindSignatures
                      
     ghc-options:     -O2
     

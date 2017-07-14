@@ -22,7 +22,7 @@ fully responsible for processing the transact by the blocks. Therefore, the spee
 is slower that it could be when implementing the same model but based on using the standard Aivika 
 facilities. 
 
-The rough estimation is that this particular package is slower in 5-6 times than the existent GPSS 
+The rough estimation is that this particular package is slower in 2-3 times than the existent GPSS 
 simulators in case of sequential simulation. But the point is that you can combine GPSS with 
 discontinuous processes, events and even agents within the same model. Moreover, you can use GPSS
 in parallel and distributed simulation models. 

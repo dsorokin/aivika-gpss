@@ -2,7 +2,7 @@
 -- |
 -- Module     : Simulation.Aivika.Trans.GPSS.Block.Loop
 -- Copyright  : Copyright (c) 2017, David Sorokin <david.sorokin@gmail.com>
--- License    : AllRightsReserved
+-- License    : BSD3
 -- Maintainer : David Sorokin <david.sorokin@gmail.com>
 -- Stability  : experimental
 -- Tested with: GHC 8.0.2
