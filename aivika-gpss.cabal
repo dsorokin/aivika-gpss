@@ -52,9 +52,17 @@ extra-source-files:  examples/Example2A.hs
                      examples/Example2CTrans.hs
                      examples/Example2D.hs
                      examples/Example2DTrans.hs
+                     examples/Example2E.hs
+                     examples/Example2ETrans.hs
                      examples/Example7-26.hs
                      examples/Example7-26Distributed.hs
                      examples/Example7-26Trans.hs
+                     examples/Example7-28.hs
+                     examples/Example7-28Trans.hs
+                     examples/Example7-31.hs
+                     examples/Example7-31Trans.hs
+                     examples/Example7-35.hs
+                     examples/Example7-35Trans.hs
 
 library
 
