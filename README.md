@@ -26,3 +26,5 @@ The rough estimation is that this particular package is slower in 2-3 times than
 simulators in case of sequential simulation. But the point is that you can combine GPSS with 
 discontinuous processes, events and even agents within the same model. Moreover, you can use GPSS
 in parallel and distributed simulation models. 
+
+Finally, you can use the following prepared [example](https://github.com/dsorokin/aivika-gpss-test).

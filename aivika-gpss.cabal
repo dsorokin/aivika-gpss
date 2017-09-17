@@ -29,9 +29,13 @@ description:
     discontinuous processes, events and even agents within the same model. Moreover, you can use GPSS
     in parallel and distributed simulation models. 
     .
+    Finally, you can use the following prepared example [3].
+    .
     \[1] <http://hackage.haskell.org/package/aivika>
     .
     \[2] <http://hackage.haskell.org/package/aivika-transformers>
+    .
+    \[3] <https://github.com/dsorokin/aivika-gpss-test>
     .
 category:        Simulation
 license:         BSD3
