@@ -23,294 +23,516 @@ import Simulation.Aivika.Trans.GPSS.Storage
 queueId :: ResultId
 queueId =
   LocalisedResultId $
-  M.fromList
-  [(russianResultLocale, "очередь"),
-   (englishResultLocale, "the queue")]
+  LocalisedResult descrs titles
+  where descrs =
+          M.fromList
+          [(russianResultLocale, "очередь"),
+           (englishResultLocale, "the queue")]
+        titles =
+          M.fromList
+          [(russianResultLocale, "очередь"),
+           (englishResultLocale, "queue")]
 
 -- | Property 'Q.queueNull'.
 queueNullId :: ResultId
 queueNullId =
   LocalisedResultId $
-  M.fromList
-  [(russianResultLocale, "очередь пуста?"),
-   (englishResultLocale, "is the queue empty?")]
+  LocalisedResult descrs titles
+  where descrs =
+          M.fromList
+          [(russianResultLocale, "очередь пуста?"),
+           (englishResultLocale, "is the queue empty?")]
+        titles =
+          M.fromList
+          [(russianResultLocale, "очередь пуста?"),
+           (englishResultLocale, "empty queue?")]
 
 -- | Property 'Q.queueContent'.
 queueContentId :: ResultId
 queueContentId =
   LocalisedResultId $
-  M.fromList
-  [(russianResultLocale, "текущее содержимое очереди"),
-   (englishResultLocale, "the current queue content")]
+  LocalisedResult descrs titles
+  where descrs =
+          M.fromList
+          [(russianResultLocale, "текущее содержимое очереди"),
+           (englishResultLocale, "the current queue content")]
+        titles =
+          M.fromList
+          [(russianResultLocale, "содержимое очереди"),
+           (englishResultLocale, "queue content")]
 
 -- | Property 'Q.queueContentStats'.
 queueContentStatsId :: ResultId
 queueContentStatsId =
   LocalisedResultId $
-  M.fromList
-  [(russianResultLocale, "статистика по содержимому очереди"),
-   (englishResultLocale, "the queue content statistics")]
+  LocalisedResult descrs titles
+  where descrs =
+          M.fromList
+          [(russianResultLocale, "статистика по содержимому очереди"),
+           (englishResultLocale, "the queue content statistics")]
+        titles =
+          M.fromList
+          [(russianResultLocale, "стат. по содержимому очереди"),
+           (englishResultLocale, "queue content stats")]
 
 -- | Property 'Q.enqueueCount'.
 enqueueCountId :: ResultId
 enqueueCountId =
   LocalisedResultId $
-  M.fromList
-  [(russianResultLocale, "количество добавленных транзактов"),
-   (englishResultLocale, "the number of enqueued transacts")]
+  LocalisedResult descrs titles
+  where descrs =
+          M.fromList
+          [(russianResultLocale, "количество добавленных транзактов"),
+           (englishResultLocale, "the number of enqueued transacts")]
+        titles =
+          M.fromList
+          [(russianResultLocale, "кол-во добавлений"),
+           (englishResultLocale, "enqueue count")]
 
 -- | Property 'Q.enqueueZeroEntryCount'.
 enqueueZeroEntryCountId :: ResultId
 enqueueZeroEntryCountId =
   LocalisedResultId $
-  M.fromList
-  [(russianResultLocale, "количество добавленных транзактов без фактического ожидания"),
-   (englishResultLocale, "the number of zero entry enqueued transacts")]
+  LocalisedResult descrs titles
+  where descrs =
+          M.fromList
+          [(russianResultLocale, "количество добавленных транзактов без фактического ожидания"),
+           (englishResultLocale, "the number of zero entry enqueued transacts")]
+        titles =
+          M.fromList
+          [(russianResultLocale, "кол-во добавлений без ожидания"),
+           (englishResultLocale, "zero entry enqueue count")]
 
 -- | Property 'Q.queueWaitTime'.
 queueWaitTimeId :: ResultId
 queueWaitTimeId =
   LocalisedResultId $
-  M.fromList
-  [(russianResultLocale, "время ожидания"),
-   (englishResultLocale, "the wait time")]
+  LocalisedResult descrs titles
+  where descrs =
+          M.fromList
+          [(russianResultLocale, "время ожидания"),
+           (englishResultLocale, "the wait time")]
+        titles =
+          M.fromList
+          [(russianResultLocale, "время ожидания"),
+           (englishResultLocale, "wait time")]
 
 -- | Property 'Q.queueNonZeroEntryWaitTime'.
 queueNonZeroEntryWaitTimeId :: ResultId
 queueNonZeroEntryWaitTimeId =
   LocalisedResultId $
-  M.fromList
-  [(russianResultLocale, "время ожидания без учета фактически неожидавших транзактов"),
-   (englishResultLocale, "the wait time without zero entries")]
+  LocalisedResult descrs titles
+  where descrs =
+          M.fromList
+          [(russianResultLocale, "время ожидания без учета фактически неожидавших транзактов"),
+           (englishResultLocale, "the wait time without zero entries")]
+        titles =
+          M.fromList
+          [(russianResultLocale, "время ожидания за вычетом неожидавших"),
+           (englishResultLocale, "non-zero entry wait time")]
 
 -- | Property 'Q.queueRate'.
 queueRateId :: ResultId
 queueRateId =
   LocalisedResultId $
-  M.fromList
-  [(russianResultLocale, "усредненная скорость (как средняя длина очереди на среднее время ожидания)"),
-   (englishResultLocale, "the average queue rate (= queue size / wait time)")]
+  LocalisedResult descrs titles
+  where descrs =
+          M.fromList
+          [(russianResultLocale, "усредненная скорость (как средняя длина очереди на среднее время ожидания)"),
+           (englishResultLocale, "the average queue rate (= queue size / wait time)")]
+        titles =
+          M.fromList
+          [(russianResultLocale, "усредненная скорость"),
+           (englishResultLocale, "queue rate")]
 
 -- | The facility identifier.
 facilityId :: ResultId
 facilityId =
   LocalisedResultId $
-  M.fromList
-  [(russianResultLocale, "прибор"),
-   (englishResultLocale, "the facility")]
+  LocalisedResult descrs titles
+  where descrs =
+          M.fromList
+          [(russianResultLocale, "прибор"),
+           (englishResultLocale, "the facility")]
+        titles =
+          M.fromList
+          [(russianResultLocale, "прибор"),
+           (englishResultLocale, "facility")]
 
 -- | Property 'facilityCount'.
 facilityCountId :: ResultId
 facilityCountId =
   LocalisedResultId $
-  M.fromList
-  [(russianResultLocale, "текущее доступное количество прибора"),
-   (englishResultLocale, "the current available count")]
+  LocalisedResult descrs titles
+  where descrs =
+          M.fromList
+          [(russianResultLocale, "текущее доступное количество прибора"),
+           (englishResultLocale, "the current available count")]
+        titles =
+          M.fromList
+          [(russianResultLocale, "доступное кол-во"),
+           (englishResultLocale, "available count")]
 
 -- | Property 'facilityCountStats'.
 facilityCountStatsId :: ResultId
 facilityCountStatsId =
   LocalisedResultId $
-  M.fromList
-  [(russianResultLocale, "статистика доступного количества прибора"),
-   (englishResultLocale, "the available count statistics")]
+  LocalisedResult descrs titles
+  where descrs =
+          M.fromList
+          [(russianResultLocale, "статистика доступного количества прибора"),
+           (englishResultLocale, "the available count statistics")]
+        titles =
+          M.fromList
+          [(russianResultLocale, "стат. доступного кол-ва"),
+           (englishResultLocale, "available count stats")]
 
 -- | Property 'facilityCaptureCount'.
 facilityCaptureCountId :: ResultId
 facilityCaptureCountId =
   LocalisedResultId $
-  M.fromList
-  [(russianResultLocale, "текущее количество захвата прибора"),
-   (englishResultLocale, "the current capture count")]
+  LocalisedResult descrs titles
+  where descrs =
+          M.fromList
+          [(russianResultLocale, "текущее количество захватов прибора"),
+           (englishResultLocale, "the current capture count")]
+        titles =
+          M.fromList
+          [(russianResultLocale, "кол-во захватов"),
+           (englishResultLocale, "capture count")]
 
 -- | Property 'facilityUtilisationCount'.
 facilityUtilisationCountId :: ResultId
 facilityUtilisationCountId =
   LocalisedResultId $
-  M.fromList
-  [(russianResultLocale, "текущее используемое количество прибора"),
-   (englishResultLocale, "the current utilisation count")]
+  LocalisedResult descrs titles
+  where descrs =
+          M.fromList
+          [(russianResultLocale, "текущее используемое количество прибора"),
+           (englishResultLocale, "the current utilisation count")]
+        titles =
+          M.fromList
+          [(russianResultLocale, "используемое кол-во"),
+           (englishResultLocale, "utilisation count")]
 
 -- | Property 'facilityUtilisationCountStats'.
 facilityUtilisationCountStatsId :: ResultId
 facilityUtilisationCountStatsId =
   LocalisedResultId $
-  M.fromList
-  [(russianResultLocale, "статистка по используемому количеству прибора"),
-   (englishResultLocale, "the utilisation count statistics")]
+  LocalisedResult descrs titles
+  where descrs =
+          M.fromList
+          [(russianResultLocale, "статистка по используемому количеству прибора"),
+           (englishResultLocale, "the utilisation count statistics")]
+        titles =
+          M.fromList
+          [(russianResultLocale, "стат. по используемому кол-ву"),
+           (englishResultLocale, "utilisation count stats")]
 
 -- | Property 'facilityQueueCount'.
 facilityQueueCountId :: ResultId
 facilityQueueCountId =
   LocalisedResultId $
-  M.fromList
-  [(russianResultLocale, "текущая длина очереди к прибору"),
-   (englishResultLocale, "the current queue size")]
+  LocalisedResult descrs titles
+  where descrs =
+          M.fromList
+          [(russianResultLocale, "текущая длина очереди к прибору"),
+           (englishResultLocale, "the current queue size")]
+        titles =
+          M.fromList
+          [(russianResultLocale, "длина очереди"),
+           (englishResultLocale, "queue size")]
 
 -- | Property 'facilityQueueCountStats'.
 facilityQueueCountStatsId :: ResultId
 facilityQueueCountStatsId =
   LocalisedResultId $
-  M.fromList
-  [(russianResultLocale, "статистика длины очереди к прибору"),
-   (englishResultLocale, "the queue size statistics")]
+  LocalisedResult descrs titles
+  where descrs =
+          M.fromList
+          [(russianResultLocale, "статистика длины очереди к прибору"),
+           (englishResultLocale, "the queue size statistics")]
+        titles =
+          M.fromList
+          [(russianResultLocale, "стат. длины очереди"),
+           (englishResultLocale, "queue size stats")]
 
 -- | Property 'facilityTotalWaitTime'.
 facilityTotalWaitTimeId :: ResultId
 facilityTotalWaitTimeId =
   LocalisedResultId $
-  M.fromList
-  [(russianResultLocale, "общее время ожидания прибора"),
-   (englishResultLocale, "the total wait time")]
+  LocalisedResult descrs titles
+  where descrs =
+          M.fromList
+          [(russianResultLocale, "общее время ожидания прибора"),
+           (englishResultLocale, "the total wait time")]
+        titles =
+          M.fromList
+          [(russianResultLocale, "общее время ожидания"),
+           (englishResultLocale, "total wait time")]
 
 -- | Property 'facilityWaitTime'.
 facilityWaitTimeId :: ResultId
 facilityWaitTimeId =
   LocalisedResultId $
-  M.fromList
-  [(russianResultLocale, "время ожидания прибора"),
-   (englishResultLocale, "the wait time")]
+  LocalisedResult descrs titles
+  where descrs =
+          M.fromList
+          [(russianResultLocale, "время ожидания прибора"),
+           (englishResultLocale, "the wait time")]
+        titles =
+          M.fromList
+          [(russianResultLocale, "время ожидания"),
+           (englishResultLocale, "wait time")]
 
 -- | Property 'facilityTotalHoldingTime'.
 facilityTotalHoldingTimeId :: ResultId
 facilityTotalHoldingTimeId =
   LocalisedResultId $
-  M.fromList
-  [(russianResultLocale, "общее время удержания прибора"),
-   (englishResultLocale, "the total holding time")]
+  LocalisedResult descrs titles
+  where descrs =
+          M.fromList
+          [(russianResultLocale, "общее время удержания прибора"),
+           (englishResultLocale, "the total holding time")]
+        titles =
+          M.fromList
+          [(russianResultLocale, "общее время удержания"),
+           (englishResultLocale, "total holding time")]
 
 -- | Property 'facilityHoldingTime'.
 facilityHoldingTimeId :: ResultId
 facilityHoldingTimeId =
   LocalisedResultId $
-  M.fromList
-  [(russianResultLocale, "время удержания прибора"),
-   (englishResultLocale, "the holding time")]
+  LocalisedResult descrs titles
+  where descrs =
+          M.fromList
+          [(russianResultLocale, "время удержания прибора"),
+           (englishResultLocale, "the holding time")]
+        titles =
+          M.fromList
+          [(russianResultLocale, "время удержания"),
+           (englishResultLocale, "holding time")]
 
 -- | Property 'facilityInterrupted'.
 facilityInterruptedId :: ResultId
 facilityInterruptedId =
   LocalisedResultId $
-  M.fromList
-  [(russianResultLocale, "удержание прибора сейчас прервано?"),
-   (englishResultLocale, "is the facility interrupted now?")]
+  LocalisedResult descrs titles
+  where descrs =
+          M.fromList
+          [(russianResultLocale, "удержание прибора сейчас прервано?"),
+           (englishResultLocale, "is the facility interrupted now?")]
+        titles =
+          M.fromList
+          [(russianResultLocale, "удержание прервано сейчас?"),
+           (englishResultLocale, "interrupted now?")]
 
 -- | The storage identifier.
 storageId :: ResultId
 storageId =
   LocalisedResultId $
-  M.fromList
-  [(russianResultLocale, "многоканальное устройство"),
-   (englishResultLocale, "the storage")]
+  LocalisedResult descrs titles
+  where descrs =
+          M.fromList
+          [(russianResultLocale, "многоканальное устройство"),
+           (englishResultLocale, "the storage")]
+        titles =
+          M.fromList
+          [(russianResultLocale, "многоканальное устройство"),
+           (englishResultLocale, "storage")]
 
 -- | Property 'storageCapacity'.
 storageCapacityId :: ResultId
 storageCapacityId =
   LocalisedResultId $
-  M.fromList
-  [(russianResultLocale, "емкость многоканального устройства"),
-   (englishResultLocale, "the storage capacity")]
+  LocalisedResult descrs titles
+  where descrs =
+          M.fromList
+          [(russianResultLocale, "емкость многоканального устройства"),
+           (englishResultLocale, "the storage capacity")]
+        titles =
+          M.fromList
+          [(russianResultLocale, "емкость"),
+           (englishResultLocale, "capacity")]
 
 -- | Property 'storageEmpty'.
 storageEmptyId :: ResultId
 storageEmptyId =
   LocalisedResultId $
-  M.fromList
-  [(russianResultLocale, "не используется ли совсем устройство сейчас?"),
-   (englishResultLocale, "is the storage unused completely now?")]
+  LocalisedResult descrs titles
+  where descrs =
+          M.fromList
+          [(russianResultLocale, "не используется ли совсем устройство сейчас?"),
+           (englishResultLocale, "is the storage unused completely now?")]
+        titles =
+          M.fromList
+          [(russianResultLocale, "не используется сейчас?"),
+           (englishResultLocale, "unused now?")]
 
 -- | Property 'storageFull'.
 storageFullId :: ResultId
 storageFullId =
   LocalisedResultId $
-  M.fromList
-  [(russianResultLocale, "используется ли устройство полностью сейчас?"),
-   (englishResultLocale, "is the storage used completely now?")]
+  LocalisedResult descrs titles
+  where descrs =
+          M.fromList
+          [(russianResultLocale, "используется ли устройство полностью сейчас?"),
+           (englishResultLocale, "is the storage used completely now?")]
+        titles =
+          M.fromList
+          [(russianResultLocale, "используется полностью сейчас?"),
+           (englishResultLocale, "used completely now?")]
 
 -- | Property 'storageContent'.
 storageContentId :: ResultId
 storageContentId =
   LocalisedResultId $
-  M.fromList
-  [(russianResultLocale, "доступное содержимое устройства"),
-   (englishResultLocale, "the current available content")]
+  LocalisedResult descrs titles
+  where descrs =
+          M.fromList
+          [(russianResultLocale, "доступное содержимое устройства"),
+           (englishResultLocale, "the current available content")]
+        titles =
+          M.fromList
+          [(russianResultLocale, "доступное содержимое"),
+           (englishResultLocale, "available content")]
 
 -- | Property 'storageContentStats'.
 storageContentStatsId :: ResultId
 storageContentStatsId =
   LocalisedResultId $
-  M.fromList
-  [(russianResultLocale, "статистика доступного содержимого устройства"),
-   (englishResultLocale, "the available content statistics")]
+  LocalisedResult descrs titles
+  where descrs =
+          M.fromList
+          [(russianResultLocale, "статистика доступного содержимого устройства"),
+           (englishResultLocale, "the available content statistics")]
+        titles =
+          M.fromList
+          [(russianResultLocale, "стат. доступного содержимого"),
+           (englishResultLocale, "available content stats")]
 
 -- | Property 'storageUseCount'.
 storageUseCountId :: ResultId
 storageUseCountId =
   LocalisedResultId $
-  M.fromList
-  [(russianResultLocale, "общее количество использований устройства"),
-   (englishResultLocale, "the total use count")]
+  LocalisedResult descrs titles
+  where descrs =
+          M.fromList
+          [(russianResultLocale, "общее количество использований устройства"),
+           (englishResultLocale, "the total use count")]
+        titles =
+          M.fromList
+          [(russianResultLocale, "общее кол-во использований"),
+           (englishResultLocale, "total use count")]
 
 -- | Property 'storageUsedContent'.
 storageUsedContentId :: ResultId
 storageUsedContentId =
   LocalisedResultId $
-  M.fromList
-  [(russianResultLocale, "общее использованное количество устройства"),
-   (englishResultLocale, "the total used content")]
+  LocalisedResult descrs titles
+  where descrs =
+          M.fromList
+          [(russianResultLocale, "общее использованное количество устройства"),
+           (englishResultLocale, "the total used content")]
+        titles =
+          M.fromList
+          [(russianResultLocale, "общее использованное кол-во"),
+           (englishResultLocale, "total used content")]
 
 -- | Property 'storageUtilisationCount'.
 storageUtilisationCountId :: ResultId
 storageUtilisationCountId =
   LocalisedResultId $
-  M.fromList
-  [(russianResultLocale, "текущее используемое количество устройства"),
-   (englishResultLocale, "the current utilisation count")]
+  LocalisedResult descrs titles
+  where descrs =
+          M.fromList
+          [(russianResultLocale, "текущее используемое количество устройства"),
+           (englishResultLocale, "the current utilisation count")]
+        titles =
+          M.fromList
+          [(russianResultLocale, "используемое кол-во"),
+           (englishResultLocale, "utilisation count")]
 
 -- | Property 'storageUtilisationCountStats'.
 storageUtilisationCountStatsId :: ResultId
 storageUtilisationCountStatsId =
   LocalisedResultId $
-  M.fromList
-  [(russianResultLocale, "статистка по используемому количеству устройства"),
-   (englishResultLocale, "the utilisation count statistics")]
+  LocalisedResult descrs titles
+  where descrs =
+          M.fromList
+          [(russianResultLocale, "статистка по используемому количеству устройства"),
+           (englishResultLocale, "the utilisation count statistics")]
+        titles =
+          M.fromList
+          [(russianResultLocale, "стат. по используемому кол-ву"),
+           (englishResultLocale, "utilisation count stats")]
 
 -- | Property 'storageQueueCount'.
 storageQueueCountId :: ResultId
 storageQueueCountId =
   LocalisedResultId $
-  M.fromList
-  [(russianResultLocale, "текущая длина очереди к устройству"),
-   (englishResultLocale, "the current queue size")]
+  LocalisedResult descrs titles
+  where descrs =
+          M.fromList
+          [(russianResultLocale, "текущая длина очереди к устройству"),
+           (englishResultLocale, "the current queue size")]
+        titles =
+          M.fromList
+          [(russianResultLocale, "длина очереди"),
+           (englishResultLocale, "queue size")]
 
 -- | Property 'storageQueueCountStats'.
 storageQueueCountStatsId :: ResultId
 storageQueueCountStatsId =
   LocalisedResultId $
-  M.fromList
-  [(russianResultLocale, "статистика длины очереди к устройству"),
-   (englishResultLocale, "the queue size statistics")]
+  LocalisedResult descrs titles
+  where descrs =
+          M.fromList
+          [(russianResultLocale, "статистика длины очереди к устройству"),
+           (englishResultLocale, "the queue size statistics")]
+        titles =
+          M.fromList
+          [(russianResultLocale, "стат. длины очереди"),
+           (englishResultLocale, "queue size stats")]
 
 -- | Property 'storageTotalWaitTime'.
 storageTotalWaitTimeId :: ResultId
 storageTotalWaitTimeId =
   LocalisedResultId $
-  M.fromList
-  [(russianResultLocale, "общее время ожидания устройства"),
-   (englishResultLocale, "the total wait time")]
+  LocalisedResult descrs titles
+  where descrs =
+          M.fromList
+          [(russianResultLocale, "общее время ожидания устройства"),
+           (englishResultLocale, "the total wait time")]
+        titles =
+          M.fromList
+          [(russianResultLocale, "общее время ожидания"),
+           (englishResultLocale, "total wait time")]
 
 -- | Property 'storageWaitTime'.
 storageWaitTimeId :: ResultId
 storageWaitTimeId =
   LocalisedResultId $
-  M.fromList
-  [(russianResultLocale, "время ожидания устройства"),
-   (englishResultLocale, "the wait time")]
+  LocalisedResult descrs titles
+  where descrs =
+          M.fromList
+          [(russianResultLocale, "время ожидания устройства"),
+           (englishResultLocale, "the wait time")]
+        titles =
+          M.fromList
+          [(russianResultLocale, "время ожидания"),
+           (englishResultLocale, "wait time")]
 
 -- | Property 'storageAverageHoldingTime'.
 storageAverageHoldingTimeId :: ResultId
 storageAverageHoldingTimeId =
   LocalisedResultId $
-  M.fromList
-  [(russianResultLocale, "среднее время удержания устройства на единицу устройства"),
-   (englishResultLocale, "the average holding time per unit")]
+  LocalisedResult descrs titles
+  where descrs =
+          M.fromList
+          [(russianResultLocale, "среднее время удержания устройства на единицу устройства"),
+           (englishResultLocale, "the average holding time per unit")]
+        titles =
+          M.fromList
+          [(russianResultLocale, "среднее время удержания"),
+           (englishResultLocale, "average holding time")]

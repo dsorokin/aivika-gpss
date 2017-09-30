@@ -161,15 +161,15 @@ storageResultSummary c =
 
 instance ResultProvider Q.Queue where
 
-  resultSource' name i m =
-    queueResultSource $ ResultContainer name i m (ResultSignal $ Q.queueChanged_ m)
+  resultSource' name names i is m =
+    queueResultSource $ ResultContainer name names i is m (ResultSignal $ Q.queueChanged_ m)
 
 instance ResultProvider (Facility a) where
 
-  resultSource' name i m =
-    facilityResultSource $ ResultContainer name i m (ResultSignal $ facilityChanged_ m)
+  resultSource' name names i is m =
+    facilityResultSource $ ResultContainer name names i is m (ResultSignal $ facilityChanged_ m)
 
 instance ResultProvider Storage where
 
-  resultSource' name i m =
-    storageResultSource $ ResultContainer name i m (ResultSignal $ storageChanged_ m)
+  resultSource' name names i is m =
+    storageResultSource $ ResultContainer name names i is m (ResultSignal $ storageChanged_ m)
