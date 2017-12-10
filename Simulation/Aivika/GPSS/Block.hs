@@ -13,6 +13,7 @@ module Simulation.Aivika.GPSS.Block
        (Block(..),
         GeneratorBlock(..),
         withinBlock,
+        processBlock,
         traceBlock) where
 
 import Control.Monad
@@ -46,6 +47,12 @@ withinBlock :: Process ()
                -> Block a a
 withinBlock m =
   Block { blockProcess = \a -> m >> return a }
+
+-- | Process every transact within the block.
+processBlock :: (a -> Process b)
+                -- ^ process the transact
+                -> Block a b
+processBlock = Block
 
 -- | Trace the specified block.
 traceBlock :: String -> Block a b -> Block a b

@@ -13,6 +13,7 @@ module Simulation.Aivika.Trans.GPSS.Block
        (Block(..),
         GeneratorBlock(..),
         withinBlock,
+        processBlock,
         traceBlock) where
 
 import Control.Monad
@@ -50,6 +51,14 @@ withinBlock :: MonadDES m
 {-# INLINABLE withinBlock #-}
 withinBlock m =
   Block { blockProcess = \a -> m >> return a }
+
+-- | Process every transact within the block.
+processBlock :: MonadDES m
+                => (a -> Process m b)
+                -- ^ process the transact
+                -> Block m a b
+{-# INLINABLE processBlock #-}
+processBlock = Block
 
 -- | Trace the specified block.
 traceBlock :: MonadDES m => String -> Block m a b -> Block m a b
