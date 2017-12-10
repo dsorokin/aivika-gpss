@@ -12,7 +12,10 @@
 module Simulation.Aivika.GPSS.Block.Generate
        (streamGeneratorBlock0,
         streamGeneratorBlock,
-        streamGeneratorBlockM) where
+        streamGeneratorBlockM,
+        signalGeneratorBlock0,
+        signalGeneratorBlock,
+        signalGeneratorBlockM) where
 
 import Simulation.Aivika
 import Simulation.Aivika.GPSS.Block
@@ -49,3 +52,37 @@ streamGeneratorBlock0 :: Stream (Arrival a)
                          -- ^ the input stream of data
                          -> GeneratorBlock (Transact a)
 streamGeneratorBlock0 s = streamGeneratorBlock s 0
+
+-- | Return a generator block by the specified signal and priority computation.
+signalGeneratorBlockM :: Signal (Arrival a)
+                         -- ^ the input signal of data
+                         -> Event Int
+                         -- ^ the transact priority
+                         -> GeneratorBlock (Transact a)
+signalGeneratorBlockM s priority =
+  let handle block a =
+        do p <- priority
+           t <- liftSimulation $ newTransact a p
+           runProcess $
+             do takeTransact t
+                blockProcess block t
+  in GeneratorBlock $ \block ->
+  do h <- liftEvent $
+          handleSignal s $
+          handle block
+     finallyProcess neverProcess
+       (liftEvent $ disposeEvent h)
+
+-- | Return a generator block by the specified signal and priority.
+signalGeneratorBlock :: Signal (Arrival a)
+                        -- ^ the input signal of data
+                        -> Int
+                        -- ^ the transact priority
+                        -> GeneratorBlock (Transact a)
+signalGeneratorBlock s = signalGeneratorBlockM s . return
+
+-- | Return a generator block by the specified signal using zero priority.
+signalGeneratorBlock0 :: Signal (Arrival a)
+                         -- ^ the input signal of data
+                         -> GeneratorBlock (Transact a)
+signalGeneratorBlock0 s = signalGeneratorBlock s 0
