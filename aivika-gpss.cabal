@@ -1,5 +1,5 @@
 name:            aivika-gpss
-version:         0.4
+version:         0.5
 synopsis:        GPSS-like DSL for Aivika
 description:
     This package allows defining simulation models in terms of a GPSS-like
