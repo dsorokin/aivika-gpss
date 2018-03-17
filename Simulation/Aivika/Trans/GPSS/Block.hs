@@ -23,7 +23,7 @@ import qualified Control.Category as C
 import Simulation.Aivika.Trans
 
 -- | Represents a GPSS block.
-data Block m a b =
+newtype Block m a b =
   Block { blockProcess :: a -> Process m b
           -- ^ Process the item.
         }
