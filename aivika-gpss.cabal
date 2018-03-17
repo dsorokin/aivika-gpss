@@ -1,5 +1,5 @@
 name:            aivika-gpss
-version:         0.5
+version:         0.6
 synopsis:        GPSS-like DSL for Aivika
 description:
     This package allows defining simulation models in terms of a GPSS-like
@@ -40,7 +40,7 @@ description:
 category:        Simulation
 license:         BSD3
 license-file:    LICENSE
-copyright:       (c) 2017. David Sorokin <david.sorokin@gmail.com>
+copyright:       (c) 2018. David Sorokin <david.sorokin@gmail.com>
 author:          David Sorokin
 maintainer:      David Sorokin <david.sorokin@gmail.com>
 homepage:        http://www.aivikasoft.com
