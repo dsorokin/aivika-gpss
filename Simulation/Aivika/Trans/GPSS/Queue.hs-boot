@@ -38,6 +38,6 @@ data QueueEntry m =
              }
 
 instance MonadDES m => Eq (Queue m)
-instance Hashable (Queue m)
+instance MonadDES m => Hashable (Queue m)
 
 instance MonadDES m => Eq (QueueEntry m)

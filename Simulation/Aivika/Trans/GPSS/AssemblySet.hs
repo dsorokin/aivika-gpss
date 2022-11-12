@@ -50,7 +50,7 @@ instance MonadDES m => Eq (AssemblySet m) where
   {-# INLINABLE (==) #-}
   x == y = (assemblySetAssemblingTransact x) == (assemblySetAssemblingTransact y)
 
-instance Hashable (AssemblySet m) where
+instance MonadDES m => Hashable (AssemblySet m) where
   hashWithSalt salt x = hashWithSalt salt (assemblySetSequenceNo x)
 
 -- | Create a new assembly set.

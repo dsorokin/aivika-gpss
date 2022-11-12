@@ -94,7 +94,7 @@ data QueueEntry m =
 instance MonadDES m => Eq (Queue m) where
   x == y = (queueContentRef x) == (queueContentRef y)
 
-instance Hashable (Queue m) where
+instance MonadDES m => Hashable (Queue m) where
   hashWithSalt salt x = hashWithSalt salt (queueSequenceNo x)
 
 -- | Create a new queue.
